@@ -1,0 +1,7 @@
+module NeuroDrive_13_5_2025
+typeinfo appNeuroDrive_13_5_2025.qmltypes
+prefer :/qt/qml/NeuroDrive_13_5_2025/
+Main 1.0 Main.qml
+FeatureButton 1.0 FeatureButton.qml
+CustomButton 1.0 CustomButton.qml
+

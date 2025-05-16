@@ -1,0 +1,7 @@
+--resource
+D:/projects/QT/NeuroDrive_13_5_2025/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/.qt/rcc/qmake_NeuroDrive_13_5_2025.qrc
+--resource
+D:/projects/QT/NeuroDrive_13_5_2025/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/.qt/rcc/appNeuroDrive_13_5_2025_raw_qml_0.qrc
+/qt/qml/NeuroDrive_13_5_2025/Main.qml
+/qt/qml/NeuroDrive_13_5_2025/FeatureButton.qml
+/qt/qml/NeuroDrive_13_5_2025/CustomButton.qml
