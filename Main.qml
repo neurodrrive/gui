@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
+import "qml/pages"
 
 ApplicationWindow {
     id: mainWindow
@@ -46,100 +47,18 @@ ApplicationWindow {
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: loginPage  // Start with the login page
+        initialItem: loginPageComponent
     }
 
-    // Login Page
+    // Login Page Component
     Component {
-        id: loginPage
-        Rectangle {
-            color: backgroundColor
-            
-            Rectangle {
-                id: loginBox
-                width: 400
-                height: 300
-                radius: 15
-                color: surfaceColor
-                border.color: subtleColor
-                border.width: 1
-                anchors.centerIn: parent
-                
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 30
-                    width: parent.width - 80
-                    
-                    Text {
-                        text: "NEURODRIVE"
-                        font.pixelSize: 32
-                        font.bold: true
-                        color: accentColor
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-                    
-                    Rectangle {
-                        id: loginButton
-                        width: parent.width
-                        height: 60
-                        radius: 10
-                        color: accentColor
-                        
-                        Text {
-                            text: "LOGIN"
-                            color: "white"
-                            font.bold: true
-                            font.pixelSize: 18
-                            anchors.centerIn: parent
-                        }
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                // Login functionality will be added later
-                                parent.scale = 0.95
-                                clickTimer1.start()
-                            }
-                        }
-                        
-                        Timer {
-                            id: clickTimer1
-                            interval: 100
-                            onTriggered: parent.scale = 1.0
-                        }
-                    }
-                    
-                    Rectangle {
-                        id: devLoginButton
-                        width: parent.width
-                        height: 60
-                        radius: 10
-                        color: secondaryColor
-                        
-                        Text {
-                            text: "LOGIN FOR DEV"
-                            color: "white"
-                            font.bold: true
-                            font.pixelSize: 18
-                            anchors.centerIn: parent
-                        }
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                parent.scale = 0.95
-                                clickTimer2.start()
-                                stackView.push(dashboardPage)
-                            }
-                        }
-                        
-                        Timer {
-                            id: clickTimer2
-                            interval: 100
-                            onTriggered: parent.scale = 1.0
-                        }
-                    }
-                }
+        id: loginPageComponent
+        LoginPage {
+            onLoginSuccessful: {
+                stackView.push(dashboardPage)
+            }
+            onLoginFailed: function(errorMessage) {
+                console.log("Login failed:", errorMessage)
             }
         }
     }

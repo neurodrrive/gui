@@ -1,6 +1,0 @@
-<RCC>
-  <qresource prefix="/qt/qml/NeuroDrive_13_5_2025">
-    <file alias="qmldir">D:/projects/QT/NeuroDrive_13_5_2025/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/NeuroDrive_13_5_2025/qmldir</file>
-  </qresource>
-</RCC>
-
