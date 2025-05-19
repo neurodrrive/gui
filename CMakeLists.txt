@@ -24,9 +24,9 @@ qt_add_qml_module(appNeuroDrive_13_5_2025
     VERSION 1.0
     QML_FILES
         Main.qml
-        FeatureButton.qml
         CustomButton.qml
         qml/pages/LoginPage.qml
+        qml/components/FeatureButton.qml
     RESOURCES
         img/youssef.jpg
 )
@@ -38,7 +38,7 @@ set_target_properties(appNeuroDrive_13_5_2025 PROPERTIES
 #    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.appNeuroDrive_13_5_2025
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE_TRUE
+    MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 

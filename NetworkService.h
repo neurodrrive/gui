@@ -10,6 +10,9 @@
 #include <QFile>
 #include <QBuffer>
 #include <QUrl>
+#include <QFileInfo>
+#include <QCoreApplication>
+#include <QSslConfiguration>
 
 class NetworkService : public QObject
 {
@@ -24,6 +27,7 @@ signals:
 
 private:
     QNetworkAccessManager *m_networkManager;
+    QSslConfiguration m_sslConfig;
     QString imageToBase64(const QString &imagePath);
 };
 

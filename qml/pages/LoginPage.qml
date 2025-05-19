@@ -2,117 +2,120 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-Item {
+// Using Page instead of Item for better StackView integration
+Page {
     id: root
+    
+    // Set explicit width and height to avoid anchor conflicts with StackView
+    width: parent ? parent.width : 800
+    height: parent ? parent.height : 480
+    
+    // Remove anchors from the root Page item and use background property
+    background: Rectangle {
+        color: mainWindow.backgroundColor
+    }
     
     // Signals
     signal loginSuccessful()
     signal loginFailed(string errorMessage)
     
     // Properties
-    property string imagePath: "img/youssef.jpg"
+    property string imagePath: "../../img/youssef.jpg"
     property string carId: "111"
     
+    // Main content
     Rectangle {
-        anchors.fill: parent
-        color: mainWindow.backgroundColor
+        id: loginBox
+        width: 400
+        height: 350
+        radius: 15
+        color: mainWindow.surfaceColor
+        border.color: mainWindow.subtleColor
+        border.width: 1
+        anchors.centerIn: parent
         
-        Rectangle {
-            id: loginBox
-            width: 400
-            height: 350
-            radius: 15
-            color: mainWindow.surfaceColor
-            border.color: mainWindow.subtleColor
-            border.width: 1
+        ColumnLayout {
             anchors.centerIn: parent
+            spacing: 30
+            width: parent.width - 80
             
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: 30
-                width: parent.width - 80
-                
-                Text {
-                    text: "NEURODRIVE"
-                    font.pixelSize: 32
-                    font.bold: true
-                    color: mainWindow.accentColor
-                    Layout.alignment: Qt.AlignHCenter
-                }
+            Text {
+                text: "NEURODRIVE"
+                font.pixelSize: 32
+                font.bold: true
+                color: mainWindow.accentColor
+                Layout.alignment: Qt.AlignHCenter
+            }
+            
+            // Image Container
+            Rectangle {
+                width: 120
+                height: 120
+                radius: width / 2
+                clip: true
+                Layout.alignment: Qt.AlignHCenter
                 
                 Image {
                     id: profileImage
+                    anchors.fill: parent
                     source: imagePath
-                    width: 120
-                    height: 120
                     fillMode: Image.PreserveAspectCrop
-                    Layout.alignment: Qt.AlignHCenter
-                    
-                    Rectangle {
-                        anchors.fill: parent
-                        radius: width / 2
-                        color: "transparent"
-                        border.width: 3
-                        border.color: mainWindow.accentColor
-                        clip: true
-                    }
-                    
-                    layer.enabled: true
-                    layer.effect: OpacityMask {
-                        maskSource: Rectangle {
-                            width: profileImage.width
-                            height: profileImage.height
-                            radius: width / 2
-                        }
-                    }
                 }
                 
                 Rectangle {
-                    id: loginButton
-                    Layout.fillWidth: true
-                    height: 60
-                    radius: 10
-                    color: mainWindow.accentColor
-                    
-                    Text {
-                        text: "LOGIN"
-                        color: "white"
-                        font.bold: true
-                        font.pixelSize: 18
-                        anchors.centerIn: parent
-                    }
-                    
-                    MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            parent.scale = 0.95
-                            loginClickTimer.start()
-                            
-                            // Call the network service to verify the driver
-                            var success = networkService.verifyDriver(carId, imagePath)
-                            if (!success) {
-                                loginFailed("Failed to initialize login request")
-                            }
+                    anchors.fill: parent
+                    radius: width / 2
+                    color: "transparent"
+                    border.width: 3
+                    border.color: mainWindow.accentColor
+                }
+            }
+            
+            Rectangle {
+                id: loginButton
+                Layout.fillWidth: true
+                height: 60
+                radius: 10
+                color: mainWindow.accentColor
+                
+                Text {
+                    text: "LOGIN"
+                    color: "white"
+                    font.bold: true
+                    font.pixelSize: 18
+                    anchors.centerIn: parent
+                }
+                
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        parent.scale = 0.95
+                        loginClickTimer.start()
+                        
+                        // Call the network service to verify the driver
+                        var success = networkService.verifyDriver(carId, imagePath)
+                        if (!success) {
+                            loginFailed("Failed to initialize login request")
                         }
-                    }
-                    
-                    Timer {
-                        id: loginClickTimer
-                        interval: 100
-                        onTriggered: loginButton.scale = 1.0
                     }
                 }
                 
-                // Status message
-                Text {
-                    id: statusMessage
-                    Layout.fillWidth: true
-                    color: mainWindow.textColor
-                    font.pixelSize: 14
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.WordWrap
-                    visible: false
+                Timer {
+                    id: loginClickTimer
+                    interval: 100
+                    onTriggered: loginButton.scale = 1.0
                 }
+            }
+            
+            // Status message
+            Text {
+                id: statusMessage
+                Layout.fillWidth: true
+                color: mainWindow.textColor
+                font.pixelSize: 14
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+                visible: false
             }
         }
     }
