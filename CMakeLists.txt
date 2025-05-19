@@ -24,7 +24,6 @@ qt_add_qml_module(appNeuroDrive_13_5_2025
     VERSION 1.0
     QML_FILES
         Main.qml
-        CustomButton.qml
         qml/pages/LoginPage.qml
         qml/components/FeatureButton.qml
     RESOURCES
