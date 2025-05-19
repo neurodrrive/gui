@@ -44,4 +44,32 @@ CMakeLists.txt.user*
 # Executables
 *.exe
 *.out
-*.app 
+*.app
+
+# VS Code files
+.vscode/
+*.code-workspace
+
+# Visual Studio files
+*.ib_pdb_index
+*.idb
+*.ilk
+*.pdb
+*.sln
+*.suo
+*.vcproj
+*vcproj.*.*.user
+*.ncb
+*.sdf
+*.opensdf
+*.vcxproj
+*vcxproj.*
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db 

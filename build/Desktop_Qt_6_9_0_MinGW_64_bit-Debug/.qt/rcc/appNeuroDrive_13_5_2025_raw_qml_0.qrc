@@ -1,8 +1,0 @@
-<RCC>
-  <qresource prefix="/qt/qml/NeuroDrive_13_5_2025/">
-    <file alias="Main.qml">D:/projects/QT/NeuroDrive_13_5_2025/Main.qml</file>
-    <file alias="FeatureButton.qml">D:/projects/QT/NeuroDrive_13_5_2025/FeatureButton.qml</file>
-    <file alias="CustomButton.qml">D:/projects/QT/NeuroDrive_13_5_2025/CustomButton.qml</file>
-  </qresource>
-</RCC>
-

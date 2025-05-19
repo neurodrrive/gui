@@ -2,6 +2,10 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
+import "./qml/pages"
+
+// Import components with fully qualified name
+import "qml/components" as Components
 
 ApplicationWindow {
     id: mainWindow
@@ -10,14 +14,17 @@ ApplicationWindow {
     height: 480
     title: "NeuroDrive Dashboard"
 
-    // Global properties
+    // Dark mode toggle property
+    property bool darkMode: true  // Set to true for default dark mode
+
+    // Global properties with dark mode support
     property color accentColor: "#0066CC"  // Darker blue
     property color secondaryColor: "#FF6B35"  // Warmer orange accent
-    property color backgroundColor: "#F5F5F5"  // Light gray/off-white
-    property color surfaceColor: "#FFFFFF"  // Pure white
-    property color textColor: "#212121"  // Dark gray, almost black
-    property color subtleColor: "#E0E0E0"  // Light gray for borders
-    property color shadowColor: "#DDDDDD"  // Shadow color
+    property color backgroundColor: darkMode ? "#121212" : "#F5F5F5"  // Background color
+    property color surfaceColor: darkMode ? "#1E1E1E" : "#FFFFFF"  // Surface color
+    property color textColor: darkMode ? "#E0E0E0" : "#212121"  // Text color
+    property color subtleColor: darkMode ? "#333333" : "#E0E0E0"  // Subtle border color
+    property color shadowColor: darkMode ? "#111111" : "#DDDDDD"  // Shadow color
 
     // Main window background
     Rectangle {
@@ -30,6 +37,7 @@ ApplicationWindow {
             spacing: 40
             columns: 20
             rows: 12
+            visible: !darkMode  // Hide grid in dark mode
             
             Repeater {
                 model: 240
@@ -46,14 +54,66 @@ ApplicationWindow {
     StackView {
         id: stackView
         anchors.fill: parent
-        initialItem: dashboardPage  // Start with the dashboard page
+        initialItem: loginPageComponent
+        
+        // Add pop transition settings
+        popEnter: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 200
+            }
+        }
+        popExit: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: 200
+            }
+        }
+        pushEnter: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 200
+            }
+        }
+        pushExit: Transition {
+            PropertyAnimation {
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: 200
+            }
+        }
+    }
+
+    // Login Page Component
+    Component {
+        id: loginPageComponent
+        LoginPage {
+            onLoginSuccessful: {
+                stackView.push(dashboardPage)
+            }
+            onLoginFailed: function(errorMessage) {
+                console.log("Login failed:", errorMessage)
+            }
+        }
     }
 
     // Dashboard Page
     Component {
         id: dashboardPage
-        Item {
-            anchors.fill: parent
+        Page {
+            width: parent ? parent.width : 800
+            height: parent ? parent.height : 480
+            
+            background: Rectangle {
+                color: backgroundColor
+            }
             
             // Header with car info
             Rectangle {
@@ -215,6 +275,7 @@ ApplicationWindow {
                         Layout.fillWidth: true
                         buttonText: "Settings"
                         iconText: "⚙️"
+                        onClicked: settingsPopup.open()
                     }
                 }
             }
@@ -264,8 +325,13 @@ ApplicationWindow {
     // Front Camera Page
     Component {
         id: frontCameraPage
-        Rectangle {
-            color: backgroundColor
+        Page {
+            width: parent ? parent.width : 800
+            height: parent ? parent.height : 480
+            
+            background: Rectangle {
+                color: backgroundColor
+            }
 
             Rectangle {
                 id: cameraView
@@ -302,20 +368,20 @@ ApplicationWindow {
                     anchors.margins: 15
                     spacing: 15
                     
-                    FeatureButton {
-                        buttonText: "Road Sign\nRecognition"
+                    Components.FeatureButton {
+                        buttonText: "Traffic Sign\nRecognition"
                         bgColor: accentColor
                         Layout.fillWidth: true
                     }
 
-                    FeatureButton {
+                    Components.FeatureButton {
                         buttonText: "Lane\nDetection"
                         bgColor: accentColor
                         Layout.fillWidth: true
                     }
 
-                    FeatureButton {
-                        buttonText: "Object\nDetection"
+                    Components.FeatureButton {
+                        buttonText: "Drowsiness +\nTraffic Sign"
                         bgColor: accentColor
                         Layout.fillWidth: true
                     }
@@ -354,8 +420,13 @@ ApplicationWindow {
     // Cabin Camera Page
     Component {
         id: cabinCameraPage
-        Rectangle {
-            color: backgroundColor
+        Page {
+            width: parent ? parent.width : 800
+            height: parent ? parent.height : 480
+            
+            background: Rectangle {
+                color: backgroundColor
+            }
 
             Rectangle {
                 id: cameraView
@@ -392,20 +463,14 @@ ApplicationWindow {
                     anchors.margins: 15
                     spacing: 15
                     
-                    FeatureButton {
-                        buttonText: "Drowsiness\nDetection"
-                        bgColor: accentColor
-                        Layout.fillWidth: true
-                    }
-
-                    FeatureButton {
+                    Components.FeatureButton {
                         buttonText: "Distraction\nMonitoring"
                         bgColor: accentColor
                         Layout.fillWidth: true
                     }
 
-                    FeatureButton {
-                        buttonText: "Face\nRecognition"
+                    Components.FeatureButton {
+                        buttonText: "Drowsiness\nDetection"
                         bgColor: accentColor
                         Layout.fillWidth: true
                     }
@@ -585,6 +650,62 @@ ApplicationWindow {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: dashBtn.clicked()
+        }
+    }
+
+    // Settings Popup
+    Popup {
+        id: settingsPopup
+        width: 300
+        height: 200
+        modal: true
+        anchors.centerIn: parent
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        
+        background: Rectangle {
+            color: surfaceColor
+            radius: 10
+            border.color: accentColor
+            border.width: 2
+        }
+        
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 15
+            spacing: 10
+            
+            Text {
+                text: "Settings"
+                font.pixelSize: 20
+                font.bold: true
+                color: textColor
+                Layout.alignment: Qt.AlignHCenter
+            }
+            
+            Rectangle {
+                height: 1
+                color: subtleColor
+                Layout.fillWidth: true
+            }
+            
+            RowLayout {
+                Layout.fillWidth: true
+                
+                Text {
+                    text: "Dark Mode"
+                    color: textColor
+                    font.pixelSize: 16
+                }
+                
+                Item { Layout.fillWidth: true }
+                
+                Switch {
+                    checked: darkMode
+                    onCheckedChanged: {
+                        darkMode = checked
+                    }
+                }
+            }
         }
     }
 }
