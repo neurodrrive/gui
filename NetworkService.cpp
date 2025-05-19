@@ -69,8 +69,21 @@ bool NetworkService::verifyDriver(const QString &carId, const QString &imagePath
             QJsonDocument responseDoc = QJsonDocument::fromJson(responseData);
             qDebug() << "Response received:" << responseData;
             
-            // Process the response - this is a simplification, adjust based on your API's response format
-            emit verificationComplete(true, "Login successful");
+            if (responseDoc.isObject()) {
+                QJsonObject responseObj = responseDoc.object();
+                bool success = responseObj["success"].toBool();
+                bool isAuthorized = responseObj["isAuthorized"].toBool();
+                QString message = responseObj["message"].toString();
+                
+                if (success && isAuthorized) {
+                    QString driverName = responseObj["driverName"].toString();
+                    emit verificationComplete(true, "Welcome " + driverName);
+                } else {
+                    emit verificationComplete(false, message);
+                }
+            } else {
+                emit verificationComplete(false, "Invalid response format");
+            }
         } else {
             qDebug() << "Error:" << reply->errorString();
             emit verificationComplete(false, "Login failed: " + reply->errorString());
