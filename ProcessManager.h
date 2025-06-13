@@ -12,6 +12,7 @@ class ProcessManager : public QObject
     Q_PROPERTY(int activeModel READ activeModel WRITE setActiveModel NOTIFY activeModelChanged)
     Q_PROPERTY(bool isRunning READ isRunning NOTIFY isRunningChanged)
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
+    Q_PROPERTY(QString pythonExecutable READ pythonExecutable WRITE setPythonExecutable NOTIFY pythonExecutableChanged)
 
 public:
     explicit ProcessManager(QObject *parent = nullptr);
@@ -29,14 +30,21 @@ public:
     int activeModel() const { return m_activeModel; }
     bool isRunning() const { return m_isRunning; }
     QString statusMessage() const { return m_statusMessage; }
+    QString pythonExecutable() const { return m_pythonExecutable; }
 
     // Property setters
     void setActiveModel(int model);
+    void setPythonExecutable(const QString &executable);
 
     // Script paths configuration
     Q_INVOKABLE void setTrafficSignPath(const QString &path);
     Q_INVOKABLE void setDrowsinessPath(const QString &path);
     Q_INVOKABLE void setCombinedPath(const QString &path);
+    
+    // Get current paths
+    Q_INVOKABLE QString getTrafficSignPath() const { return m_trafficSignPath; }
+    Q_INVOKABLE QString getDrowsinessPath() const { return m_drowsinessPath; }
+    Q_INVOKABLE QString getCombinedPath() const { return m_combinedExtraPath; }
 
 public slots:
     Q_INVOKABLE void startModel(int modelType);
@@ -46,6 +54,7 @@ signals:
     void activeModelChanged(int model);
     void isRunningChanged(bool running);
     void statusMessageChanged(const QString &message);
+    void pythonExecutableChanged(const QString &executable);
     void processError(const QString &error);
     void processFinished(int modelType, int exitCode);
 
@@ -64,8 +73,9 @@ private:
     int m_activeModel = ModelType::None;
     bool m_isRunning = false;
     QString m_statusMessage = "Ready";
+    QString m_pythonExecutable = "python3";  // Default to python3 for Linux
 
-    // Script paths
+    // Script paths - Linux paths as specified
     QString m_trafficSignPath = "/home/root/traffic/tf/tf.py";
     QString m_drowsinessPath = "/home/root/DROWSINESS/tf/drowsiness_detectorr.py";
     QString m_combinedExtraPath = "/path/to/model3/script3.py";

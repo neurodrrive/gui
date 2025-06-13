@@ -5,6 +5,20 @@
 ProcessManager::ProcessManager(QObject *parent) 
     : QObject(parent)
 {
+    // Try to detect the best Python executable
+    QProcess pythonTest;
+    pythonTest.start("python3", QStringList() << "--version");
+    if (pythonTest.waitForFinished(3000) && pythonTest.exitCode() == 0) {
+        m_pythonExecutable = "python3";
+    } else {
+        pythonTest.start("python", QStringList() << "--version");
+        if (pythonTest.waitForFinished(3000) && pythonTest.exitCode() == 0) {
+            m_pythonExecutable = "python";
+        } else {
+            m_pythonExecutable = "python3";  // Default fallback
+        }
+    }
+    updateStatus("ProcessManager initialized with " + m_pythonExecutable);
 }
 
 ProcessManager::~ProcessManager()
@@ -20,19 +34,31 @@ void ProcessManager::setActiveModel(int model)
     }
 }
 
+void ProcessManager::setPythonExecutable(const QString &executable)
+{
+    if (m_pythonExecutable != executable) {
+        m_pythonExecutable = executable;
+        emit pythonExecutableChanged(m_pythonExecutable);
+        updateStatus("Python executable set to: " + m_pythonExecutable);
+    }
+}
+
 void ProcessManager::setTrafficSignPath(const QString &path)
 {
     m_trafficSignPath = path;
+    updateStatus("Traffic sign path set to: " + path);
 }
 
 void ProcessManager::setDrowsinessPath(const QString &path)
 {
     m_drowsinessPath = path;
+    updateStatus("Drowsiness path set to: " + path);
 }
 
 void ProcessManager::setCombinedPath(const QString &path)
 {
     m_combinedExtraPath = path;
+    updateStatus("Combined path set to: " + path);
 }
 
 void ProcessManager::startModel(int modelType)
@@ -77,7 +103,7 @@ void ProcessManager::handleProcessError(QProcess::ProcessError error)
     QString errorMessage;
     switch (error) {
         case QProcess::FailedToStart:
-            errorMessage = "Process failed to start";
+            errorMessage = "Process failed to start - check if " + m_pythonExecutable + " is installed";
             break;
         case QProcess::Crashed:
             errorMessage = "Process crashed";
@@ -157,9 +183,9 @@ void ProcessManager::startTrafficSignRecognition()
     // Start the process
     QStringList arguments;
     arguments << m_trafficSignPath;
-    process->start("python", arguments);
+    process->start(m_pythonExecutable, arguments);
     
-    updateStatus("Traffic sign recognition started");
+    updateStatus("Traffic sign recognition started with " + m_pythonExecutable);
 }
 
 void ProcessManager::startDrowsinessDetection()
@@ -183,9 +209,9 @@ void ProcessManager::startDrowsinessDetection()
     // Start the process
     QStringList arguments;
     arguments << m_drowsinessPath;
-    process->start("python", arguments);
+    process->start(m_pythonExecutable, arguments);
     
-    updateStatus("Drowsiness detection started");
+    updateStatus("Drowsiness detection started with " + m_pythonExecutable);
 }
 
 void ProcessManager::startCombinedModel()
@@ -235,17 +261,17 @@ void ProcessManager::startCombinedModel()
     // Start the processes
     QStringList trafficArgs;
     trafficArgs << m_trafficSignPath;
-    trafficProcess->start("python", trafficArgs);
+    trafficProcess->start(m_pythonExecutable, trafficArgs);
     
     QStringList drowsinessArgs;
     drowsinessArgs << m_drowsinessPath;
-    drowsinessProcess->start("python", drowsinessArgs);
+    drowsinessProcess->start(m_pythonExecutable, drowsinessArgs);
     
     QStringList combinedArgs;
     combinedArgs << m_combinedExtraPath;
-    combinedProcess->start("python", combinedArgs);
+    combinedProcess->start(m_pythonExecutable, combinedArgs);
     
-    updateStatus("Combined model started");
+    updateStatus("Combined model started with " + m_pythonExecutable);
 }
 
 void ProcessManager::terminateAllProcesses()
