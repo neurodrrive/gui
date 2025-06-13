@@ -345,11 +345,51 @@ ApplicationWindow {
                 border.width: 2
                 radius: 8
                 
+                // Status overlay to show which AI model is active
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: 10
+                    height: activeModelText.implicitHeight + 10
+                    width: activeModelText.implicitWidth + 20
+                    color: processManager.isRunning ? accentColor : "transparent"
+                    radius: 4
+                    visible: processManager.activeModel > 0
+                    opacity: 0.8
+                    
+                    Text {
+                        id: activeModelText
+                        anchors.centerIn: parent
+                        text: {
+                            switch (processManager.activeModel) {
+                                case 1: return "Traffic Sign Recognition Active";
+                                case 2: return "Drowsiness Detection Active";
+                                case 3: return "Combined Model Active";
+                                default: return "";
+                            }
+                        }
+                        color: "#FFFFFF"
+                        font.pixelSize: 12
+                        font.bold: true
+                    }
+                }
+                
                 Text {
                     anchors.centerIn: parent
                     text: "Camera Feed"
                     color: "#FFFFFF"
                     font.pixelSize: 24
+                }
+                
+                // Status message at the bottom
+                Text {
+                    anchors.bottom: parent.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.margins: 10
+                    text: processManager.statusMessage
+                    color: "#FFFFFF"
+                    font.pixelSize: 14
+                    visible: processManager.statusMessage !== "Ready"
                 }
             }
             
@@ -370,8 +410,11 @@ ApplicationWindow {
                     
                     Components.FeatureButton {
                         buttonText: "Traffic Sign\nRecognition"
-                        bgColor: accentColor
+                        bgColor: processManager.activeModel === 1 ? Qt.darker(accentColor, 1.3) : accentColor
                         Layout.fillWidth: true
+                        onClicked: {
+                            processManager.startModel(1) // TrafficSignRecognition
+                        }
                     }
 
                     Components.FeatureButton {
@@ -382,8 +425,11 @@ ApplicationWindow {
 
                     Components.FeatureButton {
                         buttonText: "Drowsiness +\nTraffic Sign"
-                        bgColor: accentColor
+                        bgColor: processManager.activeModel === 3 ? Qt.darker(accentColor, 1.3) : accentColor
                         Layout.fillWidth: true
+                        onClicked: {
+                            processManager.startModel(3) // Combined
+                        }
                     }
                 }
             }
@@ -411,7 +457,47 @@ ApplicationWindow {
                 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: stackView.pop()
+                    onClicked: {
+                        // Stop any running process when navigating back
+                        if (processManager.isRunning) {
+                            processManager.stopCurrentModel()
+                        }
+                        stackView.pop()
+                    }
+                }
+            }
+            
+            // Stop button for running processes
+            Rectangle {
+                width: 50
+                height: 50
+                radius: 25
+                color: processManager.isRunning ? secondaryColor : Qt.darker(surfaceColor, 1.1)
+                border.width: 1
+                border.color: processManager.isRunning ? Qt.darker(secondaryColor, 1.2) : shadowColor
+                anchors {
+                    top: parent.top
+                    right: parent.right
+                    margins: 15
+                }
+                visible: true
+                enabled: processManager.isRunning
+                opacity: processManager.isRunning ? 1.0 : 0.5
+                
+                Text {
+                    text: "⏹"
+                    font.pixelSize: 20
+                    anchors.centerIn: parent
+                    color: "white"
+                }
+                
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        if (processManager.isRunning) {
+                            processManager.stopCurrentModel()
+                        }
+                    }
                 }
             }
         }
@@ -440,11 +526,51 @@ ApplicationWindow {
                 border.width: 2
                 radius: 8
                 
+                // Status overlay to show which AI model is active
+                Rectangle {
+                    anchors.top: parent.top
+                    anchors.right: parent.right
+                    anchors.margins: 10
+                    height: cabinActiveModelText.implicitHeight + 10
+                    width: cabinActiveModelText.implicitWidth + 20
+                    color: processManager.isRunning ? accentColor : "transparent"
+                    radius: 4
+                    visible: processManager.activeModel > 0
+                    opacity: 0.8
+                    
+                    Text {
+                        id: cabinActiveModelText
+                        anchors.centerIn: parent
+                        text: {
+                            switch (processManager.activeModel) {
+                                case 1: return "Traffic Sign Recognition Active";
+                                case 2: return "Drowsiness Detection Active";
+                                case 3: return "Combined Model Active";
+                                default: return "";
+                            }
+                        }
+                        color: "#FFFFFF"
+                        font.pixelSize: 12
+                        font.bold: true
+                    }
+                }
+                
                 Text {
                     anchors.centerIn: parent
                     text: "Cabin Camera Feed"
                     color: "#FFFFFF"
                     font.pixelSize: 24
+                }
+                
+                // Status message at the bottom
+                Text {
+                    anchors.bottom: parent.bottom
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.margins: 10
+                    text: processManager.statusMessage
+                    color: "#FFFFFF"
+                    font.pixelSize: 14
+                    visible: processManager.statusMessage !== "Ready"
                 }
             }
             
@@ -471,8 +597,11 @@ ApplicationWindow {
 
                     Components.FeatureButton {
                         buttonText: "Drowsiness\nDetection"
-                        bgColor: accentColor
+                        bgColor: processManager.activeModel === 2 ? Qt.darker(accentColor, 1.3) : accentColor
                         Layout.fillWidth: true
+                        onClicked: {
+                            processManager.startModel(2) // Drowsiness
+                        }
                     }
                 }
             }
@@ -500,7 +629,47 @@ ApplicationWindow {
                 
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: stackView.pop()
+                    onClicked: {
+                        // Stop any running process when navigating back
+                        if (processManager.isRunning) {
+                            processManager.stopCurrentModel()
+                        }
+                        stackView.pop()
+                    }
+                }
+            }
+            
+            // Stop button for running processes
+            Rectangle {
+                width: 50
+                height: 50
+                radius: 25
+                color: processManager.isRunning ? secondaryColor : Qt.darker(surfaceColor, 1.1)
+                border.width: 1
+                border.color: processManager.isRunning ? Qt.darker(secondaryColor, 1.2) : shadowColor
+                anchors {
+                    top: parent.top
+                    right: parent.right
+                    margins: 15
+                }
+                visible: true
+                enabled: processManager.isRunning
+                opacity: processManager.isRunning ? 1.0 : 0.5
+                
+                Text {
+                    text: "⏹"
+                    font.pixelSize: 20
+                    anchors.centerIn: parent
+                    color: "white"
+                }
+                
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: {
+                        if (processManager.isRunning) {
+                            processManager.stopCurrentModel()
+                        }
+                    }
                 }
             }
         }

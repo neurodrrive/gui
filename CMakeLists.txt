@@ -13,6 +13,8 @@ set(PROJECT_SOURCES
     main.cpp
     NetworkService.h
     NetworkService.cpp
+    ProcessManager.h
+    ProcessManager.cpp
 )
 
 qt_add_executable(appNeuroDrive_13_5_2025
