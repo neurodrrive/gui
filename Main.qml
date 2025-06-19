@@ -396,18 +396,48 @@ ApplicationWindow {
                     id: frontCameraVideo
                     anchors.fill: parent
                     anchors.margins: 10
-                    source: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
+                    source: processManager.isRunning && processManager.activeModel === 1 ? 
+                            "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4" : ""
                     autoPlay: true
                     loops: -1
                     fillMode: VideoOutput.PreserveAspectFit
                     
+                    // Reload video when process starts
+                    Connections {
+                        target: processManager
+                        function onIsRunningChanged() {
+                            if (processManager.isRunning && processManager.activeModel === 1) {
+                                // Wait a moment for the video file to be created
+                                reloadTimer.start()
+                            }
+                        }
+                    }
+                    
+                    Timer {
+                        id: reloadTimer
+                        interval: 2000 // Wait 2 seconds for video to be created
+                        onTriggered: {
+                            frontCameraVideo.source = ""
+                            frontCameraVideo.source = "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
+                            frontCameraVideo.play()
+                        }
+                    }
+                    
                     // Fallback text if video doesn't load
                     Text {
                         anchors.centerIn: parent
-                        text: frontCameraVideo.hasVideo ? "" : "Video Load Error"
+                        text: {
+                            if (!processManager.isRunning) {
+                                return "Start Traffic Sign Recognition to view output"
+                            } else if (!frontCameraVideo.hasVideo) {
+                                return "Loading video..."
+                            } else {
+                                return ""
+                            }
+                        }
                         color: "#FFFFFF"
                         font.pixelSize: 18
-                        visible: !frontCameraVideo.hasVideo
+                        visible: !frontCameraVideo.hasVideo || !processManager.isRunning
                     }
                     
                     // Play controls overlay
@@ -419,7 +449,7 @@ ApplicationWindow {
                         height: 30
                         color: "#B3000000"
                         radius: 5
-                        visible: !frontCameraVideo.playing
+                        visible: frontCameraVideo.hasVideo && !frontCameraVideo.playing
                         
                         Text {
                             anchors.centerIn: parent
@@ -613,18 +643,48 @@ ApplicationWindow {
                     id: cabinCameraVideo
                     anchors.fill: parent
                     anchors.margins: 10
-                    source: "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4"
+                    source: processManager.isRunning && processManager.activeModel === 2 ? 
+                            "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4" : ""
                     autoPlay: true
                     loops: -1
                     fillMode: VideoOutput.PreserveAspectFit
                     
+                    // Reload video when process starts
+                    Connections {
+                        target: processManager
+                        function onIsRunningChanged() {
+                            if (processManager.isRunning && processManager.activeModel === 2) {
+                                // Wait a moment for the video file to be created
+                                cabinReloadTimer.start()
+                            }
+                        }
+                    }
+                    
+                    Timer {
+                        id: cabinReloadTimer
+                        interval: 2000 // Wait 2 seconds for video to be created
+                        onTriggered: {
+                            cabinCameraVideo.source = ""
+                            cabinCameraVideo.source = "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4"
+                            cabinCameraVideo.play()
+                        }
+                    }
+                    
                     // Fallback text if video doesn't load
                     Text {
                         anchors.centerIn: parent
-                        text: cabinCameraVideo.hasVideo ? "" : "Video Load Error"
+                        text: {
+                            if (!processManager.isRunning) {
+                                return "Start Drowsiness Detection to view output"
+                            } else if (!cabinCameraVideo.hasVideo) {
+                                return "Loading video..."
+                            } else {
+                                return ""
+                            }
+                        }
                         color: "#FFFFFF"
                         font.pixelSize: 18
-                        visible: !cabinCameraVideo.hasVideo
+                        visible: !cabinCameraVideo.hasVideo || !processManager.isRunning
                     }
                     
                     // Play controls overlay
@@ -636,7 +696,7 @@ ApplicationWindow {
                         height: 30
                         color: "#B3000000"
                         radius: 5
-                        visible: !cabinCameraVideo.playing
+                        visible: cabinCameraVideo.hasVideo && !cabinCameraVideo.playing
                         
                         Text {
                             anchors.centerIn: parent
