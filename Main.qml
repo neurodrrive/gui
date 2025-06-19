@@ -403,7 +403,8 @@ ApplicationWindow {
                     
                     property int retryCount: 0
                     property int maxRetries: 10
-                    property string videoPath: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
+                    property string videoPath: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.avi"
+                    property string videoPathAlt: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
                     
                     // Reload video when process starts
                     Connections {
@@ -437,9 +438,29 @@ ApplicationWindow {
                         interval: 10000 // Wait 10 seconds for video processing to complete
                         onTriggered: {
                             console.log("Attempting to load video:", frontCameraVideo.videoPath)
+                            console.log("Trying multiple loading methods...")
+                            
+                            // Try different loading approaches
                             frontCameraVideo.source = ""
+                            
+                            // Method 1: Direct path
                             frontCameraVideo.source = frontCameraVideo.videoPath
-                            // Start retry timer to check if video loads
+                            
+                            // Give it a moment, then try file protocol if needed
+                            fileProtocolTimer.start()
+                        }
+                    }
+                    
+                    Timer {
+                        id: fileProtocolTimer
+                        interval: 1000
+                        onTriggered: {
+                            if (!frontCameraVideo.hasVideo) {
+                                console.log("Direct path failed, trying file:// protocol...")
+                                frontCameraVideo.source = ""
+                                frontCameraVideo.source = "file://" + frontCameraVideo.videoPath
+                            }
+                            // Start retry timer after both attempts
                             retryTimer.start()
                         }
                     }
@@ -707,7 +728,7 @@ ApplicationWindow {
                     
                     property int retryCount: 0
                     property int maxRetries: 10
-                    property string videoPath: "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4"
+                    property string videoPath: "/home/abdelrhman/Documents/drowsiness_detection_f3/output.avi"
                     
                     // Reload video when process starts
                     Connections {
