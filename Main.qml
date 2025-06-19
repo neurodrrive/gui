@@ -411,6 +411,7 @@ ApplicationWindow {
                         function onIsRunningChanged() {
                             if (processManager.isRunning && processManager.activeModel === 1) {
                                 frontCameraVideo.retryCount = 0
+                                console.log("Traffic sign process started, waiting for video processing...")
                                 reloadTimer.start()
                             } else {
                                 frontCameraVideo.source = ""
@@ -418,11 +419,22 @@ ApplicationWindow {
                                 retryTimer.stop()
                             }
                         }
+                        
+                        function onStatusMessageChanged() {
+                            console.log("Process status:", processManager.statusMessage)
+                            // If the process indicates completion, try loading video sooner
+                            if (processManager.statusMessage.includes("complete") || 
+                                processManager.statusMessage.includes("finished")) {
+                                console.log("Process seems complete, trying to load video now...")
+                                reloadTimer.stop()
+                                reloadTimer.start()
+                            }
+                        }
                     }
                     
                     Timer {
                         id: reloadTimer
-                        interval: 3000 // Wait 3 seconds for video to be created
+                        interval: 10000 // Wait 10 seconds for video processing to complete
                         onTriggered: {
                             console.log("Attempting to load video:", frontCameraVideo.videoPath)
                             frontCameraVideo.source = ""
@@ -449,7 +461,7 @@ ApplicationWindow {
                                 
                                 frontCameraVideo.retryCount++
                                 console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
-                                console.log("Video hasVideo:", frontCameraVideo.hasVideo, "playing:", frontCameraVideo.playing)
+                                console.log("Video hasVideo:", frontCameraVideo.hasVideo)
                                 frontCameraVideo.source = ""
                                 frontCameraVideo.source = frontCameraVideo.videoPath
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
@@ -741,7 +753,7 @@ ApplicationWindow {
                                 
                                 cabinCameraVideo.retryCount++
                                 console.log("Retry", cabinCameraVideo.retryCount, "loading cabin video:", cabinCameraVideo.videoPath)
-                                console.log("Cabin video hasVideo:", cabinCameraVideo.hasVideo, "playing:", cabinCameraVideo.playing)
+                                console.log("Cabin video hasVideo:", cabinCameraVideo.hasVideo)
                                 cabinCameraVideo.source = ""
                                 cabinCameraVideo.source = cabinCameraVideo.videoPath
                             } else if (cabinCameraVideo.retryCount >= cabinCameraVideo.maxRetries) {
