@@ -26,6 +26,16 @@ ApplicationWindow {
     property color subtleColor: darkMode ? "#333333" : "#E0E0E0"  // Subtle border color
     property color shadowColor: darkMode ? "#111111" : "#DDDDDD"  // Shadow color
 
+    Component.onCompleted: {
+        // Verify and set the correct script paths
+        processManager.setTrafficSignPath("/home/abdelrhman/Documents/traffic_signs_detection_3/main.py")
+        processManager.setDrowsinessPath("/home/abdelrhman/Documents/drowsiness_detection_f3/main.py")
+        
+        console.log("Script paths set:")
+        console.log("Traffic Sign:", processManager.getTrafficSignPath())
+        console.log("Drowsiness:", processManager.getDrowsinessPath())
+    }
+
     // Main window background
     Rectangle {
         anchors.fill: parent
@@ -276,6 +286,13 @@ ApplicationWindow {
                         buttonText: "Settings"
                         iconText: "⚙️"
                         onClicked: settingsPopup.open()
+                    }
+                    
+                    DashboardButton {
+                        Layout.fillWidth: true
+                        buttonText: "Debug Test"
+                        iconText: "🔍"
+                        onClicked: debugPopup.open()
                     }
                 }
             }
@@ -873,6 +890,109 @@ ApplicationWindow {
                     onCheckedChanged: {
                         darkMode = checked
                     }
+                }
+            }
+        }
+    }
+    
+    // Debug Popup
+    Popup {
+        id: debugPopup
+        width: 500
+        height: 400
+        modal: true
+        anchors.centerIn: parent
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        
+        background: Rectangle {
+            color: surfaceColor
+            radius: 10
+            border.color: accentColor
+            border.width: 2
+        }
+        
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 15
+            spacing: 10
+            
+            Text {
+                text: "Debug Information"
+                font.pixelSize: 20
+                font.bold: true
+                color: textColor
+                Layout.alignment: Qt.AlignHCenter
+            }
+            
+            Rectangle {
+                height: 1
+                color: subtleColor
+                Layout.fillWidth: true
+            }
+            
+            ScrollView {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                
+                Column {
+                    width: parent.width
+                    spacing: 10
+                    
+                    Text {
+                        text: "Python Executable: " + processManager.pythonExecutable
+                        color: textColor
+                        font.pixelSize: 12
+                        wrapMode: Text.Wrap
+                        width: parent.width
+                    }
+                    
+                    Text {
+                        text: "Traffic Sign Path: " + processManager.getTrafficSignPath()
+                        color: textColor
+                        font.pixelSize: 12
+                        wrapMode: Text.Wrap
+                        width: parent.width
+                    }
+                    
+                    Text {
+                        text: "Drowsiness Path: " + processManager.getDrowsinessPath()
+                        color: textColor
+                        font.pixelSize: 12
+                        wrapMode: Text.Wrap
+                        width: parent.width
+                    }
+                    
+                    Text {
+                        text: "Status: " + processManager.statusMessage
+                        color: textColor
+                        font.pixelSize: 12
+                        wrapMode: Text.Wrap
+                        width: parent.width
+                    }
+                }
+            }
+            
+            Rectangle {
+                height: 1
+                color: subtleColor
+                Layout.fillWidth: true
+            }
+            
+            RowLayout {
+                Layout.fillWidth: true
+                
+                Components.FeatureButton {
+                    buttonText: "Test Python"
+                    Layout.fillWidth: true
+                    onClicked: {
+                        processManager.testPythonEnvironment()
+                    }
+                }
+                
+                Components.FeatureButton {
+                    buttonText: "Close"
+                    Layout.fillWidth: true
+                    onClicked: debugPopup.close()
                 }
             }
         }

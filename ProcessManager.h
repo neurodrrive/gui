@@ -49,6 +49,7 @@ public:
 public slots:
     Q_INVOKABLE void startModel(int modelType);
     Q_INVOKABLE void stopCurrentModel();
+    Q_INVOKABLE void testPythonEnvironment();
 
 signals:
     void activeModelChanged(int model);
@@ -76,8 +77,8 @@ private:
     QString m_pythonExecutable = "python3";  // Default to python3 for Linux
 
     // Script paths - Linux paths as specified
-    QString m_trafficSignPath = "/home/root/traffic/tf/tf.py";
-    QString m_drowsinessPath = "/home/root/DROWSINESS/tf/drowsiness_detectorr.py";
+    QString m_trafficSignPath = "/home/abdelrhman/Documents/traffic_signs_detection_3/main.py";
+    QString m_drowsinessPath = "/home/abdelrhman/Documents/drowsiness_detection_f3/main.py";
     QString m_combinedExtraPath = "/path/to/model3/script3.py";
 
     // Process management

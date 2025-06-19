@@ -1,6 +1,7 @@
 #include "ProcessManager.h"
 #include <QDebug>
 #include <QDir>
+#include <QFileInfo>
 
 ProcessManager::ProcessManager(QObject *parent) 
     : QObject(parent)
@@ -129,10 +130,27 @@ void ProcessManager::handleProcessFinished(int exitCode, QProcess::ExitStatus ex
     // Find which model this process belongs to
     int modelType = m_processes.key(process, ModelType::None);
     
+    // Capture stderr output for debugging
+    QByteArray stderrData = process->readAllStandardError();
+    QByteArray stdoutData = process->readAllStandardOutput();
+    
     if (exitStatus == QProcess::NormalExit) {
-        updateStatus(QString("Process finished with exit code %1").arg(exitCode));
+        if (exitCode == 0) {
+            updateStatus(QString("Process finished successfully"));
+        } else {
+            QString errorMsg = QString("Process finished with exit code %1").arg(exitCode);
+            if (!stderrData.isEmpty()) {
+                errorMsg += QString(" - Error: %1").arg(QString::fromUtf8(stderrData));
+            }
+            updateStatus(errorMsg);
+            qWarning() << "Process stderr:" << stderrData;
+            qWarning() << "Process stdout:" << stdoutData;
+        }
     } else {
         updateStatus("Process crashed");
+        if (!stderrData.isEmpty()) {
+            qWarning() << "Process stderr before crash:" << stderrData;
+        }
     }
     
     emit processFinished(modelType, exitCode);
@@ -180,12 +198,27 @@ void ProcessManager::startTrafficSignRecognition()
     }
     m_processes[ModelType::TrafficSignRecognition] = process;
     
+    // Set working directory to the script's directory
+    QFileInfo scriptInfo(m_trafficSignPath);
+    if (scriptInfo.exists()) {
+        process->setWorkingDirectory(scriptInfo.absolutePath());
+        updateStatus("Working directory set to: " + scriptInfo.absolutePath());
+    } else {
+        updateStatus("Warning: Script file does not exist at " + m_trafficSignPath);
+    }
+    
     // Start the process
     QStringList arguments;
     arguments << m_trafficSignPath;
     process->start(m_pythonExecutable, arguments);
     
-    updateStatus("Traffic sign recognition started with " + m_pythonExecutable);
+    // Wait a bit to see if it starts successfully
+    if (!process->waitForStarted(5000)) {
+        updateStatus("Failed to start traffic sign recognition process");
+        return;
+    }
+    
+    updateStatus("Traffic sign recognition started with " + m_pythonExecutable + " in " + process->workingDirectory());
 }
 
 void ProcessManager::startDrowsinessDetection()
@@ -206,12 +239,27 @@ void ProcessManager::startDrowsinessDetection()
     }
     m_processes[ModelType::Drowsiness] = process;
     
+    // Set working directory to the script's directory
+    QFileInfo scriptInfo(m_drowsinessPath);
+    if (scriptInfo.exists()) {
+        process->setWorkingDirectory(scriptInfo.absolutePath());
+        updateStatus("Working directory set to: " + scriptInfo.absolutePath());
+    } else {
+        updateStatus("Warning: Script file does not exist at " + m_drowsinessPath);
+    }
+    
     // Start the process
     QStringList arguments;
     arguments << m_drowsinessPath;
     process->start(m_pythonExecutable, arguments);
     
-    updateStatus("Drowsiness detection started with " + m_pythonExecutable);
+    // Wait a bit to see if it starts successfully
+    if (!process->waitForStarted(5000)) {
+        updateStatus("Failed to start drowsiness detection process");
+        return;
+    }
+    
+    updateStatus("Drowsiness detection started with " + m_pythonExecutable + " in " + process->workingDirectory());
 }
 
 void ProcessManager::startCombinedModel()
@@ -295,4 +343,48 @@ void ProcessManager::updateStatus(const QString &message)
     m_statusMessage = message;
     emit statusMessageChanged(m_statusMessage);
     qDebug() << "ProcessManager:" << message;
+}
+
+void ProcessManager::testPythonEnvironment()
+{
+    QProcess *testProcess = new QProcess(this);
+    
+    // Test if Python executable exists and is working
+    connect(testProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            [this, testProcess](int exitCode, QProcess::ExitStatus exitStatus) {
+                QByteArray output = testProcess->readAllStandardOutput();
+                QByteArray error = testProcess->readAllStandardError();
+                
+                if (exitCode == 0) {
+                    updateStatus("Python test successful: " + QString::fromUtf8(output).trimmed());
+                } else {
+                    updateStatus("Python test failed - Exit code: " + QString::number(exitCode) + 
+                               " Error: " + QString::fromUtf8(error));
+                }
+                
+                testProcess->deleteLater();
+            });
+    
+    connect(testProcess, QOverload<QProcess::ProcessError>::of(&QProcess::errorOccurred),
+            [this, testProcess](QProcess::ProcessError error) {
+                QString errorMsg = "Python test error: ";
+                switch (error) {
+                    case QProcess::FailedToStart:
+                        errorMsg += "Failed to start - check if " + m_pythonExecutable + " is installed";
+                        break;
+                    default:
+                        errorMsg += "Error code " + QString::number(error);
+                        break;
+                }
+                updateStatus(errorMsg);
+                testProcess->deleteLater();
+            });
+    
+    updateStatus("Testing Python environment...");
+    testProcess->start(m_pythonExecutable, QStringList() << "--version");
+    
+    if (!testProcess->waitForStarted(3000)) {
+        updateStatus("Failed to start Python test");
+        testProcess->deleteLater();
+    }
 } 
