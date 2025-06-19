@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Shapes
+import QtMultimedia
 import "./qml/pages"
 
 // Import components with fully qualified name
@@ -244,7 +245,7 @@ ApplicationWindow {
                         Text {
                             text: "km/h"
                             font.pixelSize: 16
-                            color: Qt.darker(textColor, 0.7)
+                            color: Qt.lighter(textColor, 1.4)
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
                     }
@@ -391,11 +392,47 @@ ApplicationWindow {
                     }
                 }
                 
-                Text {
-                    anchors.centerIn: parent
-                    text: "Camera Feed"
-                    color: "#FFFFFF"
-                    font.pixelSize: 24
+                Video {
+                    id: frontCameraVideo
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    source: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
+                    autoPlay: true
+                    loops: -1
+                    fillMode: VideoOutput.PreserveAspectFit
+                    
+                    // Fallback text if video doesn't load
+                    Text {
+                        anchors.centerIn: parent
+                        text: frontCameraVideo.hasVideo ? "" : "Video Load Error"
+                        color: "#FFFFFF"
+                        font.pixelSize: 18
+                        visible: !frontCameraVideo.hasVideo
+                    }
+                    
+                    // Play controls overlay
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.margins: 10
+                        width: 60
+                        height: 30
+                        color: "#B3000000"
+                        radius: 5
+                        visible: !frontCameraVideo.playing
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "▶"
+                            color: "white"
+                            font.pixelSize: 16
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: frontCameraVideo.play()
+                        }
+                    }
                 }
                 
                 // Status message at the bottom
@@ -572,11 +609,47 @@ ApplicationWindow {
                     }
                 }
                 
-                Text {
-                    anchors.centerIn: parent
-                    text: "Cabin Camera Feed"
-                    color: "#FFFFFF"
-                    font.pixelSize: 24
+                Video {
+                    id: cabinCameraVideo
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    source: "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4"
+                    autoPlay: true
+                    loops: -1
+                    fillMode: VideoOutput.PreserveAspectFit
+                    
+                    // Fallback text if video doesn't load
+                    Text {
+                        anchors.centerIn: parent
+                        text: cabinCameraVideo.hasVideo ? "" : "Video Load Error"
+                        color: "#FFFFFF"
+                        font.pixelSize: 18
+                        visible: !cabinCameraVideo.hasVideo
+                    }
+                    
+                    // Play controls overlay
+                    Rectangle {
+                        anchors.bottom: parent.bottom
+                        anchors.left: parent.left
+                        anchors.margins: 10
+                        width: 60
+                        height: 30
+                        color: "#B3000000"
+                        radius: 5
+                        visible: !cabinCameraVideo.playing
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "▶"
+                            color: "white"
+                            font.pixelSize: 16
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: cabinCameraVideo.play()
+                        }
+                    }
                 }
                 
                 // Status message at the bottom
