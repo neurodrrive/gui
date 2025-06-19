@@ -436,9 +436,15 @@ ApplicationWindow {
                         repeat: true
                         onTriggered: {
                             if (frontCameraVideo.retryCount < frontCameraVideo.maxRetries && 
-                                !frontCameraVideo.hasVideo && 
                                 processManager.isRunning && 
                                 processManager.activeModel === 1) {
+                                
+                                if (frontCameraVideo.hasVideo) {
+                                    console.log("Video loaded successfully")
+                                    retryTimer.stop()
+                                    return
+                                }
+                                
                                 frontCameraVideo.retryCount++
                                 console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
                                 frontCameraVideo.source = ""
@@ -446,34 +452,12 @@ ApplicationWindow {
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
                                 console.log("Max retries reached for video loading")
                                 retryTimer.stop()
-                            } else if (frontCameraVideo.hasVideo) {
-                                console.log("Video loaded successfully")
-                                retryTimer.stop()
                             }
                         }
                     }
                     
-                    onStatusChanged: {
-                        console.log("Video status changed:", status)
-                        if (status === MediaPlayer.Loaded) {
-                            retryTimer.stop()
-                        } else if (status === MediaPlayer.InvalidMedia || status === MediaPlayer.UnknownStatus) {
-                            if (processManager.isRunning && processManager.activeModel === 1 && retryCount < maxRetries) {
-                                retryTimer.start()
-                            }
-                        }
-                    }
-                    
-                    onErrorStringChanged: {
-                        if (errorString) {
-                            console.log("Video error:", errorString)
-                        }
-                    }
-                    
-                    onSourceChanged: {
-                        if (source && source !== "") {
-                            console.log("Video source changed to:", source)
-                        }
+                    Component.onCompleted: {
+                        console.log("Front camera video component created")
                     }
                     
                     // Fallback text if video doesn't load
@@ -741,9 +725,15 @@ ApplicationWindow {
                         repeat: true
                         onTriggered: {
                             if (cabinCameraVideo.retryCount < cabinCameraVideo.maxRetries && 
-                                !cabinCameraVideo.hasVideo && 
                                 processManager.isRunning && 
                                 processManager.activeModel === 2) {
+                                
+                                if (cabinCameraVideo.hasVideo) {
+                                    console.log("Cabin video loaded successfully")
+                                    cabinRetryTimer.stop()
+                                    return
+                                }
+                                
                                 cabinCameraVideo.retryCount++
                                 console.log("Retry", cabinCameraVideo.retryCount, "loading cabin video:", cabinCameraVideo.videoPath)
                                 cabinCameraVideo.source = ""
@@ -751,34 +741,12 @@ ApplicationWindow {
                             } else if (cabinCameraVideo.retryCount >= cabinCameraVideo.maxRetries) {
                                 console.log("Max retries reached for cabin video loading")
                                 cabinRetryTimer.stop()
-                            } else if (cabinCameraVideo.hasVideo) {
-                                console.log("Cabin video loaded successfully")
-                                cabinRetryTimer.stop()
                             }
                         }
                     }
                     
-                    onStatusChanged: {
-                        console.log("Cabin video status changed:", status)
-                        if (status === MediaPlayer.Loaded) {
-                            cabinRetryTimer.stop()
-                        } else if (status === MediaPlayer.InvalidMedia || status === MediaPlayer.UnknownStatus) {
-                            if (processManager.isRunning && processManager.activeModel === 2 && retryCount < maxRetries) {
-                                cabinRetryTimer.start()
-                            }
-                        }
-                    }
-                    
-                    onErrorStringChanged: {
-                        if (errorString) {
-                            console.log("Cabin video error:", errorString)
-                        }
-                    }
-                    
-                    onSourceChanged: {
-                        if (source && source !== "") {
-                            console.log("Cabin video source changed to:", source)
-                        }
+                    Component.onCompleted: {
+                        console.log("Cabin camera video component created")
                     }
                     
                     // Fallback text if video doesn't load
