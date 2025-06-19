@@ -396,30 +396,83 @@ ApplicationWindow {
                     id: frontCameraVideo
                     anchors.fill: parent
                     anchors.margins: 10
-                    source: processManager.isRunning && processManager.activeModel === 1 ? 
-                            "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4" : ""
+                    source: ""
                     autoPlay: true
                     loops: -1
                     fillMode: VideoOutput.PreserveAspectFit
+                    
+                    property int retryCount: 0
+                    property int maxRetries: 10
+                    property string videoPath: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
                     
                     // Reload video when process starts
                     Connections {
                         target: processManager
                         function onIsRunningChanged() {
                             if (processManager.isRunning && processManager.activeModel === 1) {
-                                // Wait a moment for the video file to be created
+                                frontCameraVideo.retryCount = 0
                                 reloadTimer.start()
+                            } else {
+                                frontCameraVideo.source = ""
+                                reloadTimer.stop()
+                                retryTimer.stop()
                             }
                         }
                     }
                     
                     Timer {
                         id: reloadTimer
-                        interval: 2000 // Wait 2 seconds for video to be created
+                        interval: 3000 // Wait 3 seconds for video to be created
                         onTriggered: {
+                            console.log("Attempting to load video:", frontCameraVideo.videoPath)
                             frontCameraVideo.source = ""
-                            frontCameraVideo.source = "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
-                            frontCameraVideo.play()
+                            frontCameraVideo.source = frontCameraVideo.videoPath
+                        }
+                    }
+                    
+                    Timer {
+                        id: retryTimer
+                        interval: 2000 // Retry every 2 seconds
+                        repeat: true
+                        onTriggered: {
+                            if (frontCameraVideo.retryCount < frontCameraVideo.maxRetries && 
+                                !frontCameraVideo.hasVideo && 
+                                processManager.isRunning && 
+                                processManager.activeModel === 1) {
+                                frontCameraVideo.retryCount++
+                                console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
+                                frontCameraVideo.source = ""
+                                frontCameraVideo.source = frontCameraVideo.videoPath
+                            } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
+                                console.log("Max retries reached for video loading")
+                                retryTimer.stop()
+                            } else if (frontCameraVideo.hasVideo) {
+                                console.log("Video loaded successfully")
+                                retryTimer.stop()
+                            }
+                        }
+                    }
+                    
+                    onStatusChanged: {
+                        console.log("Video status changed:", status)
+                        if (status === MediaPlayer.Loaded) {
+                            retryTimer.stop()
+                        } else if (status === MediaPlayer.InvalidMedia || status === MediaPlayer.UnknownStatus) {
+                            if (processManager.isRunning && processManager.activeModel === 1 && retryCount < maxRetries) {
+                                retryTimer.start()
+                            }
+                        }
+                    }
+                    
+                    onErrorStringChanged: {
+                        if (errorString) {
+                            console.log("Video error:", errorString)
+                        }
+                    }
+                    
+                    onSourceChanged: {
+                        if (source && source !== "") {
+                            console.log("Video source changed to:", source)
                         }
                     }
                     
@@ -427,17 +480,19 @@ ApplicationWindow {
                     Text {
                         anchors.centerIn: parent
                         text: {
-                            if (!processManager.isRunning) {
+                            if (!processManager.isRunning || processManager.activeModel !== 1) {
                                 return "Start Traffic Sign Recognition to view output"
+                            } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
+                                return "Failed to load video after " + frontCameraVideo.maxRetries + " attempts"
                             } else if (!frontCameraVideo.hasVideo) {
-                                return "Loading video..."
+                                return "Loading video... (attempt " + (frontCameraVideo.retryCount + 1) + ")"
                             } else {
                                 return ""
                             }
                         }
                         color: "#FFFFFF"
                         font.pixelSize: 18
-                        visible: !frontCameraVideo.hasVideo || !processManager.isRunning
+                        visible: !frontCameraVideo.hasVideo || (!processManager.isRunning || processManager.activeModel !== 1)
                     }
                     
                     // Play controls overlay
@@ -460,7 +515,10 @@ ApplicationWindow {
                         
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: frontCameraVideo.play()
+                            onClicked: {
+                                console.log("Play button clicked")
+                                frontCameraVideo.play()
+                            }
                         }
                     }
                 }
@@ -643,30 +701,83 @@ ApplicationWindow {
                     id: cabinCameraVideo
                     anchors.fill: parent
                     anchors.margins: 10
-                    source: processManager.isRunning && processManager.activeModel === 2 ? 
-                            "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4" : ""
+                    source: ""
                     autoPlay: true
                     loops: -1
                     fillMode: VideoOutput.PreserveAspectFit
+                    
+                    property int retryCount: 0
+                    property int maxRetries: 10
+                    property string videoPath: "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4"
                     
                     // Reload video when process starts
                     Connections {
                         target: processManager
                         function onIsRunningChanged() {
                             if (processManager.isRunning && processManager.activeModel === 2) {
-                                // Wait a moment for the video file to be created
+                                cabinCameraVideo.retryCount = 0
                                 cabinReloadTimer.start()
+                            } else {
+                                cabinCameraVideo.source = ""
+                                cabinReloadTimer.stop()
+                                cabinRetryTimer.stop()
                             }
                         }
                     }
                     
                     Timer {
                         id: cabinReloadTimer
-                        interval: 2000 // Wait 2 seconds for video to be created
+                        interval: 3000 // Wait 3 seconds for video to be created
                         onTriggered: {
+                            console.log("Attempting to load cabin video:", cabinCameraVideo.videoPath)
                             cabinCameraVideo.source = ""
-                            cabinCameraVideo.source = "/home/abdelrhman/Documents/drowsiness_detection_f3/output.mp4"
-                            cabinCameraVideo.play()
+                            cabinCameraVideo.source = cabinCameraVideo.videoPath
+                        }
+                    }
+                    
+                    Timer {
+                        id: cabinRetryTimer
+                        interval: 2000 // Retry every 2 seconds
+                        repeat: true
+                        onTriggered: {
+                            if (cabinCameraVideo.retryCount < cabinCameraVideo.maxRetries && 
+                                !cabinCameraVideo.hasVideo && 
+                                processManager.isRunning && 
+                                processManager.activeModel === 2) {
+                                cabinCameraVideo.retryCount++
+                                console.log("Retry", cabinCameraVideo.retryCount, "loading cabin video:", cabinCameraVideo.videoPath)
+                                cabinCameraVideo.source = ""
+                                cabinCameraVideo.source = cabinCameraVideo.videoPath
+                            } else if (cabinCameraVideo.retryCount >= cabinCameraVideo.maxRetries) {
+                                console.log("Max retries reached for cabin video loading")
+                                cabinRetryTimer.stop()
+                            } else if (cabinCameraVideo.hasVideo) {
+                                console.log("Cabin video loaded successfully")
+                                cabinRetryTimer.stop()
+                            }
+                        }
+                    }
+                    
+                    onStatusChanged: {
+                        console.log("Cabin video status changed:", status)
+                        if (status === MediaPlayer.Loaded) {
+                            cabinRetryTimer.stop()
+                        } else if (status === MediaPlayer.InvalidMedia || status === MediaPlayer.UnknownStatus) {
+                            if (processManager.isRunning && processManager.activeModel === 2 && retryCount < maxRetries) {
+                                cabinRetryTimer.start()
+                            }
+                        }
+                    }
+                    
+                    onErrorStringChanged: {
+                        if (errorString) {
+                            console.log("Cabin video error:", errorString)
+                        }
+                    }
+                    
+                    onSourceChanged: {
+                        if (source && source !== "") {
+                            console.log("Cabin video source changed to:", source)
                         }
                     }
                     
@@ -674,17 +785,19 @@ ApplicationWindow {
                     Text {
                         anchors.centerIn: parent
                         text: {
-                            if (!processManager.isRunning) {
+                            if (!processManager.isRunning || processManager.activeModel !== 2) {
                                 return "Start Drowsiness Detection to view output"
+                            } else if (cabinCameraVideo.retryCount >= cabinCameraVideo.maxRetries) {
+                                return "Failed to load video after " + cabinCameraVideo.maxRetries + " attempts"
                             } else if (!cabinCameraVideo.hasVideo) {
-                                return "Loading video..."
+                                return "Loading video... (attempt " + (cabinCameraVideo.retryCount + 1) + ")"
                             } else {
                                 return ""
                             }
                         }
                         color: "#FFFFFF"
                         font.pixelSize: 18
-                        visible: !cabinCameraVideo.hasVideo || !processManager.isRunning
+                        visible: !cabinCameraVideo.hasVideo || (!processManager.isRunning || processManager.activeModel !== 2)
                     }
                     
                     // Play controls overlay
@@ -707,7 +820,10 @@ ApplicationWindow {
                         
                         MouseArea {
                             anchors.fill: parent
-                            onClicked: cabinCameraVideo.play()
+                            onClicked: {
+                                console.log("Cabin play button clicked")
+                                cabinCameraVideo.play()
+                            }
                         }
                     }
                 }
