@@ -427,6 +427,8 @@ ApplicationWindow {
                             console.log("Attempting to load video:", frontCameraVideo.videoPath)
                             frontCameraVideo.source = ""
                             frontCameraVideo.source = frontCameraVideo.videoPath
+                            // Start retry timer to check if video loads
+                            retryTimer.start()
                         }
                     }
                     
@@ -447,6 +449,7 @@ ApplicationWindow {
                                 
                                 frontCameraVideo.retryCount++
                                 console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
+                                console.log("Video hasVideo:", frontCameraVideo.hasVideo, "playing:", frontCameraVideo.playing)
                                 frontCameraVideo.source = ""
                                 frontCameraVideo.source = frontCameraVideo.videoPath
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
@@ -716,6 +719,8 @@ ApplicationWindow {
                             console.log("Attempting to load cabin video:", cabinCameraVideo.videoPath)
                             cabinCameraVideo.source = ""
                             cabinCameraVideo.source = cabinCameraVideo.videoPath
+                            // Start retry timer to check if video loads
+                            cabinRetryTimer.start()
                         }
                     }
                     
@@ -736,6 +741,7 @@ ApplicationWindow {
                                 
                                 cabinCameraVideo.retryCount++
                                 console.log("Retry", cabinCameraVideo.retryCount, "loading cabin video:", cabinCameraVideo.videoPath)
+                                console.log("Cabin video hasVideo:", cabinCameraVideo.hasVideo, "playing:", cabinCameraVideo.playing)
                                 cabinCameraVideo.source = ""
                                 cabinCameraVideo.source = cabinCameraVideo.videoPath
                             } else if (cabinCameraVideo.retryCount >= cabinCameraVideo.maxRetries) {
