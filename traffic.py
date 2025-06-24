@@ -83,20 +83,33 @@ def process_video(input_filename):
     return True
 
 if __name__ == '__main__':
-    ssl_keyfile = 'key.pem'
-    ssl_certfile = 'cert.pem'
-    video_filename = 'vid.mp4'  # Change this if you want a different video
-    process_video(video_filename)
-    if not (os.path.exists(ssl_keyfile) and os.path.exists(ssl_certfile)):
-        logger.error("SSL certificates not found. Generate using:")
-        logger.error("openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365 -subj '/CN=localhost'")
-        exit(1)
-    logger.info("Starting server with SSL on https://localhost:8000")
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        ssl_keyfile=ssl_keyfile,
-        ssl_certfile=ssl_certfile,
-        log_level="info"
-    ) 
+    import sys
+    
+    # If running from ProcessManager, just process video and exit
+    if len(sys.argv) == 1:
+        video_filename = 'vid.mp4'  # Change this if you want a different video
+        success = process_video(video_filename)
+        if success:
+            logger.info("Video processing completed successfully")
+            exit(0)
+        else:
+            logger.error("Video processing failed")
+            exit(1)
+    
+    # Only start web server if explicitly requested with --server argument
+    if len(sys.argv) > 1 and sys.argv[1] == '--server':
+        ssl_keyfile = 'key.pem'
+        ssl_certfile = 'cert.pem'
+        if not (os.path.exists(ssl_keyfile) and os.path.exists(ssl_certfile)):
+            logger.error("SSL certificates not found. Generate using:")
+            logger.error("openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem -days 365 -subj '/CN=localhost'")
+            exit(1)
+        logger.info("Starting server with SSL on https://localhost:8000")
+        uvicorn.run(
+            "main:app",
+            host="0.0.0.0",
+            port=8000,
+            ssl_keyfile=ssl_keyfile,
+            ssl_certfile=ssl_certfile,
+            log_level="info"
+        ) 

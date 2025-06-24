@@ -491,7 +491,7 @@ ApplicationWindow {
 
                     Timer {
                         id: retryTimer
-                        interval: 2000 // Retry every 2 seconds
+                        interval: 1000 // Retry every 1 second for faster response
                         repeat: true
                         onTriggered: {
                             if (frontCameraVideo.retryCount < frontCameraVideo.maxRetries &&
@@ -499,15 +499,21 @@ ApplicationWindow {
                                 (processManager.activeModel === 1 || processManager.activeModel === 4)) {
 
                                 if (frontCameraVideo.hasVideo) {
-                                    console.log("Video loaded successfully")
+                                    console.log("Video loaded successfully on retry", frontCameraVideo.retryCount)
                                     retryTimer.stop()
                                     return
                                 }
 
                                 frontCameraVideo.retryCount++
                                 console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
+                                
+                                // Try alternating between direct path and file protocol
                                 frontCameraVideo.source = ""
-                                frontCameraVideo.source = frontCameraVideo.videoPath
+                                if (frontCameraVideo.retryCount % 2 === 0) {
+                                    frontCameraVideo.source = "file://" + frontCameraVideo.videoPath
+                                } else {
+                                    frontCameraVideo.source = frontCameraVideo.videoPath
+                                }
                                 console.log("Video hasVideo:", frontCameraVideo.hasVideo)
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
                                 console.log("Max retries reached for video loading")
