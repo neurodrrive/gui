@@ -29,9 +29,9 @@ ApplicationWindow {
 
     Component.onCompleted: {
         // Verify and set the correct script paths
-        processManager.setTrafficSignPath("/home/abdelrhman/Documents/traffic_signs_detection_3/main.py")
-        processManager.setDrowsinessPath("/home/abdelrhman/Documents/drowsiness_detection_f3/main.py")
-        
+        processManager.setTrafficSignPath("/home/abdelrhman/Documents/models/traffic_signs_detection_3/main.py")
+        processManager.setDrowsinessPath("/home/abdelrhman/Documents/models/drowsiness_detection_f3/main.py")
+
         console.log("Script paths set:")
         console.log("Traffic Sign:", processManager.getTrafficSignPath())
         console.log("Drowsiness:", processManager.getDrowsinessPath())
@@ -41,7 +41,7 @@ ApplicationWindow {
     Rectangle {
         anchors.fill: parent
         color: backgroundColor
-        
+
         // Background grid pattern
         Grid {
             anchors.fill: parent
@@ -49,7 +49,7 @@ ApplicationWindow {
             columns: 20
             rows: 12
             visible: !darkMode  // Hide grid in dark mode
-            
+
             Repeater {
                 model: 240
                 Rectangle {
@@ -66,7 +66,7 @@ ApplicationWindow {
         id: stackView
         anchors.fill: parent
         initialItem: loginPageComponent
-        
+
         // Add pop transition settings
         popEnter: Transition {
             PropertyAnimation {
@@ -121,11 +121,11 @@ ApplicationWindow {
         Page {
             width: parent ? parent.width : 800
             height: parent ? parent.height : 480
-            
+
             background: Rectangle {
                 color: backgroundColor
             }
-            
+
             // Header with car info
             Rectangle {
                 id: header
@@ -135,27 +135,27 @@ ApplicationWindow {
                 anchors.top: parent.top
                 border.width: 1
                 border.color: shadowColor
-                
+
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 10
                     spacing: 20
-                    
+
                     Text {
                         text: "NEURODRIVE"
                         font.pixelSize: 24
                         font.bold: true
                         color: accentColor
                     }
-                    
+
                     Item { Layout.fillWidth: true }
-                    
+
                     Text {
                         text: Qt.formatDateTime(new Date(), "hh:mm")
                         font.pixelSize: 20
                         color: textColor
                     }
-                    
+
                     Text {
                         text: "23°C"
                         font.pixelSize: 20
@@ -163,7 +163,7 @@ ApplicationWindow {
                     }
                 }
             }
-            
+
             // Main content area with speedometer and features
             Item {
                 anchors.top: header.bottom
@@ -171,7 +171,7 @@ ApplicationWindow {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.margins: 10
-                
+
                 // Left side - Speedometer
                 Item {
                     id: speedometer
@@ -179,17 +179,17 @@ ApplicationWindow {
                     height: width
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
-                    
+
                     // Outer circle
                     Shape {
                         anchors.fill: parent
-                        
+
                         ShapePath {
                             strokeWidth: 10
                             strokeColor: subtleColor
                             fillColor: "transparent"
                             capStyle: ShapePath.RoundCap
-                            
+
                             PathAngleArc {
                                 centerX: speedometer.width / 2
                                 centerY: speedometer.height / 2
@@ -199,14 +199,14 @@ ApplicationWindow {
                                 sweepAngle: 240
                             }
                         }
-                        
+
                         // Speed indicator
                         ShapePath {
                             strokeWidth: 10
                             strokeColor: accentColor
                             fillColor: "transparent"
                             capStyle: ShapePath.RoundCap
-                            
+
                             PathAngleArc {
                                 centerX: speedometer.width / 2
                                 centerY: speedometer.height / 2
@@ -217,7 +217,7 @@ ApplicationWindow {
                             }
                         }
                     }
-                    
+
                     // Center circle
                     Rectangle {
                         width: 120
@@ -228,12 +228,12 @@ ApplicationWindow {
                         border.color: subtleColor
                         anchors.centerIn: parent
                     }
-                    
+
                     // Speed text
                     Column {
                         anchors.centerIn: parent
                         spacing: 5
-                        
+
                         Text {
                             text: "75"
                             font.pixelSize: 48
@@ -241,7 +241,7 @@ ApplicationWindow {
                             color: textColor
                             anchors.horizontalCenter: parent.horizontalCenter
                         }
-                        
+
                         Text {
                             text: "km/h"
                             font.pixelSize: 16
@@ -250,7 +250,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                
+
                 // Right side - Feature buttons
                 GridLayout {
                     anchors.left: speedometer.right
@@ -260,35 +260,35 @@ ApplicationWindow {
                     columns: 2
                     rowSpacing: 15
                     columnSpacing: 15
-                    
+
                     DashboardButton {
                         Layout.fillWidth: true
                         buttonText: "Front Camera"
-                        iconText: "🛣️"
+                        iconText: "🛣"
                         onClicked: stackView.push(frontCameraPage)
                     }
-                    
+
                     DashboardButton {
                         Layout.fillWidth: true
                         buttonText: "Cabin Camera"
-                        iconText: "👁️"
+                        iconText: "👁"
                         onClicked: stackView.push(cabinCameraPage)
                     }
-                    
+
                     DashboardButton {
                         Layout.fillWidth: true
                         buttonText: "Mate Drive"
                         iconText: "🎤"
                         onClicked: speechPopup.open()
                     }
-                    
+
                     DashboardButton {
                         Layout.fillWidth: true
                         buttonText: "Settings"
-                        iconText: "⚙️"
+                        iconText: "⚙"
                         onClicked: settingsPopup.open()
                     }
-                    
+
                     DashboardButton {
                         Layout.fillWidth: true
                         buttonText: "Debug Test"
@@ -297,7 +297,7 @@ ApplicationWindow {
                     }
                 }
             }
-            
+
             // Footer with status indicators
             Rectangle {
                 id: footer
@@ -307,29 +307,29 @@ ApplicationWindow {
                 anchors.bottom: parent.bottom
                 border.width: 1
                 border.color: shadowColor
-                
+
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 10
                     spacing: 15
-                    
+
                     StatusIndicator {
                         icon: "⚡"
                         text: "Battery: 80%"
                     }
-                    
+
                     StatusIndicator {
-                        icon: "🛰️"
+                        icon: "🛰"
                         text: "GPS: Active"
                     }
-                    
+
                     StatusIndicator {
                         icon: "📶"
                         text: "Network: Connected"
                     }
-                    
+
                     Item { Layout.fillWidth: true }
-                    
+
                     Text {
                         text: "v1.0"
                         color: "#888888"
@@ -346,7 +346,7 @@ ApplicationWindow {
         Page {
             width: parent ? parent.width : 800
             height: parent ? parent.height : 480
-            
+
             background: Rectangle {
                 color: backgroundColor
             }
@@ -362,7 +362,7 @@ ApplicationWindow {
                 border.color: accentColor
                 border.width: 2
                 radius: 8
-                
+
                 // Status overlay to show which AI model is active
                 Rectangle {
                     anchors.top: parent.top
@@ -374,7 +374,7 @@ ApplicationWindow {
                     radius: 4
                     visible: processManager.activeModel > 0
                     opacity: 0.8
-                    
+
                     Text {
                         id: activeModelText
                         anchors.centerIn: parent
@@ -391,7 +391,7 @@ ApplicationWindow {
                         font.bold: true
                     }
                 }
-                
+
                 Video {
                     id: frontCameraVideo
                     anchors.fill: parent
@@ -400,12 +400,12 @@ ApplicationWindow {
                     autoPlay: true
                     loops: -1
                     fillMode: VideoOutput.PreserveAspectFit
-                    
+
                     property int retryCount: 0
                     property int maxRetries: 10
-                    property string videoPath: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.avi"
-                    property string videoPathAlt: "/home/abdelrhman/Documents/traffic_signs_detection_3/output.mp4"
-                    
+                    property string videoPath: "/home/abdelrhman/Documents/models/traffic_signs_detection_3/output.avi"
+                    property string videoPathAlt: "/home/abdelrhman/Documents/models/drowsiness_detection_f3/output.mp4"
+
                     // Reload video when process starts
                     Connections {
                         target: processManager
@@ -420,11 +420,11 @@ ApplicationWindow {
                                 retryTimer.stop()
                             }
                         }
-                        
+
                         function onStatusMessageChanged() {
                             console.log("Process status:", processManager.statusMessage)
                             // If the process indicates completion, try loading video sooner
-                            if (processManager.statusMessage.includes("complete") || 
+                            if (processManager.statusMessage.includes("complete") ||
                                 processManager.statusMessage.includes("finished")) {
                                 console.log("Process seems complete, trying to load video now...")
                                 reloadTimer.stop()
@@ -432,25 +432,25 @@ ApplicationWindow {
                             }
                         }
                     }
-                    
+
                     Timer {
                         id: reloadTimer
                         interval: 10000 // Wait 10 seconds for video processing to complete
                         onTriggered: {
                             console.log("Attempting to load video:", frontCameraVideo.videoPath)
                             console.log("Trying multiple loading methods...")
-                            
+
                             // Try different loading approaches
                             frontCameraVideo.source = ""
-                            
+
                             // Method 1: Direct path
                             frontCameraVideo.source = frontCameraVideo.videoPath
-                            
+
                             // Give it a moment, then try file protocol if needed
                             fileProtocolTimer.start()
                         }
                     }
-                    
+
                     Timer {
                         id: fileProtocolTimer
                         interval: 1000
@@ -464,22 +464,22 @@ ApplicationWindow {
                             retryTimer.start()
                         }
                     }
-                    
+
                     Timer {
                         id: retryTimer
                         interval: 2000 // Retry every 2 seconds
                         repeat: true
                         onTriggered: {
-                            if (frontCameraVideo.retryCount < frontCameraVideo.maxRetries && 
-                                processManager.isRunning && 
+                            if (frontCameraVideo.retryCount < frontCameraVideo.maxRetries &&
+                                processManager.isRunning &&
                                 processManager.activeModel === 1) {
-                                
+
                                 if (frontCameraVideo.hasVideo) {
                                     console.log("Video loaded successfully")
                                     retryTimer.stop()
                                     return
                                 }
-                                
+
                                 frontCameraVideo.retryCount++
                                 console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
                                 console.log("Video hasVideo:", frontCameraVideo.hasVideo)
@@ -491,11 +491,11 @@ ApplicationWindow {
                             }
                         }
                     }
-                    
+
                     Component.onCompleted: {
                         console.log("Front camera video component created")
                     }
-                    
+
                     // Fallback text if video doesn't load
                     Text {
                         anchors.centerIn: parent
@@ -514,7 +514,7 @@ ApplicationWindow {
                         font.pixelSize: 18
                         visible: !frontCameraVideo.hasVideo || (!processManager.isRunning || processManager.activeModel !== 1)
                     }
-                    
+
                     // Play controls overlay
                     Rectangle {
                         anchors.bottom: parent.bottom
@@ -525,14 +525,14 @@ ApplicationWindow {
                         color: "#B3000000"
                         radius: 5
                         visible: frontCameraVideo.hasVideo && !frontCameraVideo.playing
-                        
+
                         Text {
                             anchors.centerIn: parent
                             text: "▶"
                             color: "white"
                             font.pixelSize: 16
                         }
-                        
+
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
@@ -542,7 +542,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                
+
                 // Status message at the bottom
                 Text {
                     anchors.bottom: parent.bottom
@@ -554,7 +554,7 @@ ApplicationWindow {
                     visible: processManager.statusMessage !== "Ready"
                 }
             }
-            
+
             Rectangle {
                 id: controlPanel
                 anchors.bottom: parent.bottom
@@ -564,12 +564,12 @@ ApplicationWindow {
                 color: surfaceColor
                 border.width: 1
                 border.color: shadowColor
-                
+
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 15
                     spacing: 15
-                    
+
                     Components.FeatureButton {
                         buttonText: "Traffic Sign\nRecognition"
                         bgColor: processManager.activeModel === 1 ? Qt.darker(accentColor, 1.3) : accentColor
@@ -609,14 +609,14 @@ ApplicationWindow {
                     left: parent.left
                     margins: 15
                 }
-                
+
                 Text {
                     text: "←"
                     font.pixelSize: 24
                     anchors.centerIn: parent
                     color: textColor
                 }
-                
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -628,7 +628,7 @@ ApplicationWindow {
                     }
                 }
             }
-            
+
             // Stop button for running processes
             Rectangle {
                 width: 50
@@ -645,14 +645,14 @@ ApplicationWindow {
                 visible: true
                 enabled: processManager.isRunning
                 opacity: processManager.isRunning ? 1.0 : 0.5
-                
+
                 Text {
                     text: "⏹"
                     font.pixelSize: 20
                     anchors.centerIn: parent
                     color: "white"
                 }
-                
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -671,7 +671,7 @@ ApplicationWindow {
         Page {
             width: parent ? parent.width : 800
             height: parent ? parent.height : 480
-            
+
             background: Rectangle {
                 color: backgroundColor
             }
@@ -687,7 +687,7 @@ ApplicationWindow {
                 border.color: accentColor
                 border.width: 2
                 radius: 8
-                
+
                 // Status overlay to show which AI model is active
                 Rectangle {
                     anchors.top: parent.top
@@ -699,7 +699,7 @@ ApplicationWindow {
                     radius: 4
                     visible: processManager.activeModel > 0
                     opacity: 0.8
-                    
+
                     Text {
                         id: cabinActiveModelText
                         anchors.centerIn: parent
@@ -716,7 +716,7 @@ ApplicationWindow {
                         font.bold: true
                     }
                 }
-                
+
                 Video {
                     id: cabinCameraVideo
                     anchors.fill: parent
@@ -725,53 +725,87 @@ ApplicationWindow {
                     autoPlay: true
                     loops: -1
                     fillMode: VideoOutput.PreserveAspectFit
-                    
+
                     property int retryCount: 0
                     property int maxRetries: 10
-                    property string videoPath: "/home/abdelrhman/Documents/drowsiness_detection_f3/output.avi"
-                    
+                    property string videoPath: "/home/abdelrhman/Documents/models/drowsiness_detection_f3/output.avi"
+
                     // Reload video when process starts
                     Connections {
                         target: processManager
                         function onIsRunningChanged() {
                             if (processManager.isRunning && processManager.activeModel === 2) {
                                 cabinCameraVideo.retryCount = 0
+                                console.log("Drowsiness detection process started, waiting for video processing...")
                                 cabinReloadTimer.start()
                             } else {
                                 cabinCameraVideo.source = ""
                                 cabinReloadTimer.stop()
                                 cabinRetryTimer.stop()
+                                cabinFileProtocolTimer.stop()
                             }
+                        }
+                        
+                        function onStatusMessageChanged() {
+                            console.log("Process status:", processManager.statusMessage)
+                            // If the process indicates completion, try loading video sooner
+                            if (processManager.statusMessage.includes("complete") || 
+                                processManager.statusMessage.includes("finished") ||
+                                processManager.statusMessage.includes("Done")) {
+                                console.log("Process seems complete, trying to load video now...")
+                                cabinReloadTimer.stop()
+                                cabinReloadTimer.start()
+                            }
+                        }
+                    }
+
+                    Timer {
+                        id: cabinReloadTimer
+                        interval: 5000 // Wait 5 seconds for video processing to complete
+                        onTriggered: {
+                            console.log("Attempting to load cabin video:", cabinCameraVideo.videoPath)
+                            console.log("Trying multiple loading methods...")
+                            
+                            // Reset source
+                            cabinCameraVideo.source = ""
+                            
+                            // Method 1: Direct path
+                            cabinCameraVideo.source = cabinCameraVideo.videoPath
+                            
+                            // Give it a moment, then try file protocol if needed
+                            cabinFileProtocolTimer.start()
                         }
                     }
                     
                     Timer {
-                        id: cabinReloadTimer
-                        interval: 3000 // Wait 3 seconds for video to be created
+                        id: cabinFileProtocolTimer
+                        interval: 1000
                         onTriggered: {
-                            console.log("Attempting to load cabin video:", cabinCameraVideo.videoPath)
-                            cabinCameraVideo.source = ""
-                            cabinCameraVideo.source = cabinCameraVideo.videoPath
-                            // Start retry timer to check if video loads
+                            if (!cabinCameraVideo.hasVideo) {
+                                console.log("Direct path failed, trying file:// protocol...")
+                                cabinCameraVideo.source = ""
+                                cabinCameraVideo.source = "file://" + cabinCameraVideo.videoPath
+                            }
+                            // Start retry timer after both attempts
                             cabinRetryTimer.start()
                         }
                     }
-                    
+
                     Timer {
                         id: cabinRetryTimer
                         interval: 2000 // Retry every 2 seconds
                         repeat: true
                         onTriggered: {
-                            if (cabinCameraVideo.retryCount < cabinCameraVideo.maxRetries && 
-                                processManager.isRunning && 
+                            if (cabinCameraVideo.retryCount < cabinCameraVideo.maxRetries &&
+                                processManager.isRunning &&
                                 processManager.activeModel === 2) {
-                                
+
                                 if (cabinCameraVideo.hasVideo) {
                                     console.log("Cabin video loaded successfully")
                                     cabinRetryTimer.stop()
                                     return
                                 }
-                                
+
                                 cabinCameraVideo.retryCount++
                                 console.log("Retry", cabinCameraVideo.retryCount, "loading cabin video:", cabinCameraVideo.videoPath)
                                 console.log("Cabin video hasVideo:", cabinCameraVideo.hasVideo)
@@ -783,11 +817,11 @@ ApplicationWindow {
                             }
                         }
                     }
-                    
+
                     Component.onCompleted: {
                         console.log("Cabin camera video component created")
                     }
-                    
+
                     // Fallback text if video doesn't load
                     Text {
                         anchors.centerIn: parent
@@ -806,7 +840,7 @@ ApplicationWindow {
                         font.pixelSize: 18
                         visible: !cabinCameraVideo.hasVideo || (!processManager.isRunning || processManager.activeModel !== 2)
                     }
-                    
+
                     // Play controls overlay
                     Rectangle {
                         anchors.bottom: parent.bottom
@@ -817,14 +851,14 @@ ApplicationWindow {
                         color: "#B3000000"
                         radius: 5
                         visible: cabinCameraVideo.hasVideo && !cabinCameraVideo.playing
-                        
+
                         Text {
                             anchors.centerIn: parent
                             text: "▶"
                             color: "white"
                             font.pixelSize: 16
                         }
-                        
+
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
@@ -834,7 +868,7 @@ ApplicationWindow {
                         }
                     }
                 }
-                
+
                 // Status message at the bottom
                 Text {
                     anchors.bottom: parent.bottom
@@ -846,7 +880,7 @@ ApplicationWindow {
                     visible: processManager.statusMessage !== "Ready"
                 }
             }
-            
+
             Rectangle {
                 id: controlPanel
                 anchors.bottom: parent.bottom
@@ -856,12 +890,12 @@ ApplicationWindow {
                 color: surfaceColor
                 border.width: 1
                 border.color: shadowColor
-                
+
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: 15
                     spacing: 15
-                    
+
                     Components.FeatureButton {
                         buttonText: "Distraction\nMonitoring"
                         bgColor: accentColor
@@ -892,14 +926,14 @@ ApplicationWindow {
                     left: parent.left
                     margins: 15
                 }
-                
+
                 Text {
                     text: "←"
                     font.pixelSize: 24
                     anchors.centerIn: parent
                     color: textColor
                 }
-                
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -911,7 +945,7 @@ ApplicationWindow {
                     }
                 }
             }
-            
+
             // Stop button for running processes
             Rectangle {
                 width: 50
@@ -928,14 +962,14 @@ ApplicationWindow {
                 visible: true
                 enabled: processManager.isRunning
                 opacity: processManager.isRunning ? 1.0 : 0.5
-                
+
                 Text {
                     text: "⏹"
                     font.pixelSize: 20
                     anchors.centerIn: parent
                     color: "white"
                 }
-                
+
                 MouseArea {
                     anchors.fill: parent
                     onClicked: {
@@ -982,20 +1016,20 @@ ApplicationWindow {
                 font.bold: true
                 anchors.horizontalCenter: parent.horizontalCenter
             }
-            
+
             Rectangle {
                 width: 200
                 height: 4
                 color: subtleColor
                 anchors.horizontalCenter: parent.horizontalCenter
-                
+
                 Rectangle {
                     property int position: 0
                     id: animatedBar
                     width: 50
                     height: parent.height
                     color: accentColor
-                    
+
                     NumberAnimation on position {
                         from: 0
                         to: 150
@@ -1003,56 +1037,56 @@ ApplicationWindow {
                         loops: Animation.Infinite
                         running: speechPopup.visible
                     }
-                    
+
                     x: animatedBar.position
                 }
             }
         }
     }
-    
+
     // Custom Components
-    
+
     // Status Indicator Component
     component StatusIndicator: RowLayout {
         property string icon: ""
         property string text: ""
         spacing: 5
-        
+
         Text {
             text: icon
             font.pixelSize: 16
         }
-        
+
         Text {
             text: text
             color: textColor
             font.pixelSize: 14
         }
     }
-    
+
     // Dashboard Button Component
     component DashboardButton: Rectangle {
         id: dashBtn
         signal clicked()
         property string buttonText: ""
         property string iconText: ""
-        
+
         height: 90
         radius: 10
         color: surfaceColor
         border.color: subtleColor
         border.width: 1
-        
+
         Column {
             anchors.centerIn: parent
             spacing: 5
-            
+
             Text {
                 text: iconText
                 font.pixelSize: 24
                 anchors.horizontalCenter: parent.horizontalCenter
             }
-            
+
             Text {
                 text: buttonText
                 color: textColor
@@ -1061,7 +1095,7 @@ ApplicationWindow {
                 anchors.horizontalCenter: parent.horizontalCenter
             }
         }
-        
+
         MouseArea {
             anchors.fill: parent
             onClicked: {
@@ -1070,13 +1104,13 @@ ApplicationWindow {
                 dashBtn.clicked()
             }
         }
-        
+
         Timer {
             id: clickTimer
             interval: 100
             onTriggered: parent.scale = 1.0
         }
-        
+
         // Hover effect
         states: State {
             name: "hovered"
@@ -1086,7 +1120,7 @@ ApplicationWindow {
                 border.color: accentColor
             }
         }
-        
+
         MouseArea {
             id: mouseArea
             anchors.fill: parent
@@ -1103,19 +1137,19 @@ ApplicationWindow {
         modal: true
         anchors.centerIn: parent
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        
+
         background: Rectangle {
             color: surfaceColor
             radius: 10
             border.color: accentColor
             border.width: 2
         }
-        
+
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: 15
             spacing: 10
-            
+
             Text {
                 text: "Settings"
                 font.pixelSize: 20
@@ -1123,24 +1157,24 @@ ApplicationWindow {
                 color: textColor
                 Layout.alignment: Qt.AlignHCenter
             }
-            
+
             Rectangle {
                 height: 1
                 color: subtleColor
                 Layout.fillWidth: true
             }
-            
+
             RowLayout {
                 Layout.fillWidth: true
-                
+
                 Text {
                     text: "Dark Mode"
                     color: textColor
                     font.pixelSize: 16
                 }
-                
+
                 Item { Layout.fillWidth: true }
-                
+
                 Switch {
                     checked: darkMode
                     onCheckedChanged: {
@@ -1150,7 +1184,7 @@ ApplicationWindow {
             }
         }
     }
-    
+
     // Debug Popup
     Popup {
         id: debugPopup
@@ -1159,19 +1193,19 @@ ApplicationWindow {
         modal: true
         anchors.centerIn: parent
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        
+
         background: Rectangle {
             color: surfaceColor
             radius: 10
             border.color: accentColor
             border.width: 2
         }
-        
+
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: 15
             spacing: 10
-            
+
             Text {
                 text: "Debug Information"
                 font.pixelSize: 20
@@ -1179,21 +1213,21 @@ ApplicationWindow {
                 color: textColor
                 Layout.alignment: Qt.AlignHCenter
             }
-            
+
             Rectangle {
                 height: 1
                 color: subtleColor
                 Layout.fillWidth: true
             }
-            
+
             ScrollView {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                
+
                 Column {
                     width: parent.width
                     spacing: 10
-                    
+
                     Text {
                         text: "Python Executable: " + processManager.pythonExecutable
                         color: textColor
@@ -1201,7 +1235,7 @@ ApplicationWindow {
                         wrapMode: Text.Wrap
                         width: parent.width
                     }
-                    
+
                     Text {
                         text: "Traffic Sign Path: " + processManager.getTrafficSignPath()
                         color: textColor
@@ -1209,7 +1243,7 @@ ApplicationWindow {
                         wrapMode: Text.Wrap
                         width: parent.width
                     }
-                    
+
                     Text {
                         text: "Drowsiness Path: " + processManager.getDrowsinessPath()
                         color: textColor
@@ -1217,7 +1251,7 @@ ApplicationWindow {
                         wrapMode: Text.Wrap
                         width: parent.width
                     }
-                    
+
                     Text {
                         text: "Status: " + processManager.statusMessage
                         color: textColor
@@ -1227,16 +1261,16 @@ ApplicationWindow {
                     }
                 }
             }
-            
+
             Rectangle {
                 height: 1
                 color: subtleColor
                 Layout.fillWidth: true
             }
-            
+
             RowLayout {
                 Layout.fillWidth: true
-                
+
                 Components.FeatureButton {
                     buttonText: "Test Python"
                     Layout.fillWidth: true
@@ -1244,7 +1278,7 @@ ApplicationWindow {
                         processManager.testPythonEnvironment()
                     }
                 }
-                
+
                 Components.FeatureButton {
                     buttonText: "Close"
                     Layout.fillWidth: true
