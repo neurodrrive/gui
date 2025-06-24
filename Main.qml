@@ -404,17 +404,6 @@ ApplicationWindow {
                     autoPlay: true
                     loops: MediaPlayer.Infinite
                     fillMode: VideoOutput.PreserveAspectFit
-                    
-                    onStatusChanged: {
-                        if (status === MediaPlayer.Loaded) {
-                            console.log("Video loaded successfully, duration:", duration)
-                            play()
-                        } else if (status === MediaPlayer.EndOfMedia) {
-                            console.log("Video reached end, restarting")
-                            seek(0)
-                            play()
-                        }
-                    }
 
                     property int retryCount: 0
                     property int maxRetries: 10
