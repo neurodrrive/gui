@@ -402,8 +402,19 @@ ApplicationWindow {
                     anchors.margins: 10
                     source: ""
                     autoPlay: true
-                    loops: -1
+                    loops: MediaPlayer.Infinite
                     fillMode: VideoOutput.PreserveAspectFit
+                    
+                    onStatusChanged: {
+                        if (status === MediaPlayer.Loaded) {
+                            console.log("Video loaded successfully, duration:", duration)
+                            play()
+                        } else if (status === MediaPlayer.EndOfMedia) {
+                            console.log("Video reached end, restarting")
+                            seek(0)
+                            play()
+                        }
+                    }
 
                     property int retryCount: 0
                     property int maxRetries: 10
@@ -421,18 +432,17 @@ ApplicationWindow {
                                     frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/traffic_signs_detection_3/output.avi"
                                 } else if (processManager.activeModel === 4) {
                                     console.log("Lane detection process started, waiting for video processing...")
-                                    // Try both possible output paths
                                     frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/lane_detection_3/output.avi"
-                                    frontCameraVideo.videoPathAlt = "/home/abdelrhman/Documents/models/lane_detection_3/output.mp4"
                                     console.log("Looking for lane detection output at: " + frontCameraVideo.videoPath)
-                                    console.log("Alternative path: " + frontCameraVideo.videoPathAlt)
                                 }
                                 reloadTimer.start()
-                            } else {
+                            } else if (processManager.activeModel === 0) {
+                                // Only clear the video if we're completely stopping (model = 0)
                                 frontCameraVideo.source = ""
                                 reloadTimer.stop()
                                 retryTimer.stop()
                             }
+                            // If process finished but model is still active, keep playing the video
                         }
 
                         function onStatusMessageChanged() {
@@ -478,33 +488,13 @@ ApplicationWindow {
                             if (!frontCameraVideo.hasVideo) {
                                 console.log("Direct path failed, trying file:// protocol...")
                                 frontCameraVideo.source = ""
-                                
-                                // Try primary path with file:// protocol
                                 var filePath = "file://" + frontCameraVideo.videoPath
                                 console.log("Loading with file:// protocol:", filePath)
                                 frontCameraVideo.source = filePath
-                                
-                                // Schedule an attempt with the alternative path
-                                altPathTimer.start()
                             } else {
                                 console.log("Direct path succeeded, video loaded")
-                                retryTimer.start()
                             }
-                        }
-                    }
-                    
-                    Timer {
-                        id: altPathTimer
-                        interval: 1000
-                        onTriggered: {
-                            if (!frontCameraVideo.hasVideo) {
-                                console.log("Primary path with file:// protocol failed, trying alternative path...")
-                                frontCameraVideo.source = ""
-                                var altFilePath = "file://" + frontCameraVideo.videoPathAlt
-                                console.log("Loading alternative path with file:// protocol:", altFilePath)
-                                frontCameraVideo.source = altFilePath
-                            }
-                            // Start retry timer after all attempts
+                            // Start retry timer after attempt
                             retryTimer.start()
                         }
                     }
@@ -525,18 +515,9 @@ ApplicationWindow {
                                 }
 
                                 frontCameraVideo.retryCount++
-                                
-                                // Try alternating between primary and alternative paths
-                                if (frontCameraVideo.retryCount % 2 === 1) {
-                                    console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
-                                    frontCameraVideo.source = ""
-                                    frontCameraVideo.source = frontCameraVideo.videoPath
-                                } else {
-                                    console.log("Retry", frontCameraVideo.retryCount, "loading alternative video:", frontCameraVideo.videoPathAlt)
-                                    frontCameraVideo.source = ""
-                                    frontCameraVideo.source = frontCameraVideo.videoPathAlt
-                                }
-                                
+                                console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
+                                frontCameraVideo.source = ""
+                                frontCameraVideo.source = frontCameraVideo.videoPath
                                 console.log("Video hasVideo:", frontCameraVideo.hasVideo)
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
                                 console.log("Max retries reached for video loading")
@@ -565,7 +546,7 @@ ApplicationWindow {
                         }
                         color: "#FFFFFF"
                         font.pixelSize: 18
-                        visible: !frontCameraVideo.hasVideo || (!processManager.isRunning || (processManager.activeModel !== 1 && processManager.activeModel !== 4))
+                        visible: !frontCameraVideo.hasVideo && ((processManager.activeModel === 1 || processManager.activeModel === 4))
                     }
 
                     // Play controls overlay
