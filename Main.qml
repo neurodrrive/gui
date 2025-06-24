@@ -439,7 +439,8 @@ ApplicationWindow {
                             // If the process indicates completion, try loading video sooner
                             if (processManager.statusMessage.includes("complete") ||
                                 processManager.statusMessage.includes("finished") ||
-                                processManager.statusMessage.includes("Output saved")) {
+                                processManager.statusMessage.includes("Output saved") ||
+                                processManager.statusMessage.includes("Process finished successfully")) {
                                 console.log("Process seems complete, trying to load video now...")
                                 reloadTimer.stop()
                                 reloadTimer.start()

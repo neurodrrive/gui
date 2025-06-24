@@ -117,9 +117,18 @@ def main():
     fps = cap.get(cv2.CAP_PROP_FPS)
     output_size = (600, 600)
 
-    # Output video setup - Using MJPG codec which is widely compatible with Qt on Linux
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    # Output video setup - Using XVID codec which is widely compatible with Qt on Linux
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(OUTPUT_VIDEO, fourcc, fps, output_size)
+    
+    if not out.isOpened():
+        print("Warning: Could not open video writer with XVID, trying MJPG...")
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        out = cv2.VideoWriter(OUTPUT_VIDEO, fourcc, fps, output_size)
+        
+    if not out.isOpened():
+        print("Error: Could not open video writer")
+        return
 
     while True:
         ret, frame = cap.read()

@@ -47,11 +47,21 @@ def process_video(input_filename):
         logger.error(f"{input_filename} not found in project root.")
         return False
     cap = cv2.VideoCapture(input_path)
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    # Use XVID codec for better compatibility with Qt
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
     fps = cap.get(cv2.CAP_PROP_FPS) or 25
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    
+    if not out.isOpened():
+        logger.warning("Could not open video writer with XVID, trying MJPG...")
+        fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+        
+    if not out.isOpened():
+        logger.error("Could not open video writer")
+        return False
     while True:
         ret, frame = cap.read()
         if not ret:

@@ -2,6 +2,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QFileInfo>
+#include <QTimer>
 
 ProcessManager::ProcessManager(QObject *parent) 
     : QObject(parent)
@@ -143,23 +144,37 @@ void ProcessManager::handleProcessFinished(int exitCode, QProcess::ExitStatus ex
     QByteArray stderrData = process->readAllStandardError();
     QByteArray stdoutData = process->readAllStandardOutput();
     
+    QString modelName;
+    switch (static_cast<ModelType>(modelType)) {
+        case TrafficSignRecognition: modelName = "Traffic Sign"; break;
+        case Drowsiness: modelName = "Drowsiness"; break;
+        case LaneDetection: modelName = "Lane Detection"; break;
+        case Combined: modelName = "Combined"; break;
+        default: modelName = "Unknown"; break;
+    }
+    
     if (exitStatus == QProcess::NormalExit) {
         if (exitCode == 0) {
-            updateStatus(QString("Process finished successfully"));
+            updateStatus(QString("%1 process finished successfully").arg(modelName));
         } else {
-            QString errorMsg = QString("Process finished with exit code %1").arg(exitCode);
+            QString errorMsg = QString("%1 process finished with exit code %2").arg(modelName).arg(exitCode);
             if (!stderrData.isEmpty()) {
                 errorMsg += QString(" - Error: %1").arg(QString::fromUtf8(stderrData));
             }
             updateStatus(errorMsg);
-            qWarning() << "Process stderr:" << stderrData;
-            qWarning() << "Process stdout:" << stdoutData;
+            qWarning() << modelName << "Process stderr:" << stderrData;
+            qWarning() << modelName << "Process stdout:" << stdoutData;
         }
     } else {
-        updateStatus("Process crashed");
+        updateStatus(QString("%1 process crashed").arg(modelName));
         if (!stderrData.isEmpty()) {
-            qWarning() << "Process stderr before crash:" << stderrData;
+            qWarning() << modelName << "Process stderr before crash:" << stderrData;
         }
+    }
+    
+    // Always print stdout if available for debugging
+    if (!stdoutData.isEmpty()) {
+        qDebug() << modelName << "Process stdout:" << stdoutData;
     }
     
     emit processFinished(modelType, exitCode);
@@ -228,6 +243,19 @@ void ProcessManager::startTrafficSignRecognition()
     }
     
     updateStatus("Traffic sign recognition started with " + m_pythonExecutable + " in " + process->workingDirectory());
+    
+    // Set up a timer to check process status periodically
+    QTimer *statusTimer = new QTimer(this);
+    statusTimer->setSingleShot(false);
+    statusTimer->setInterval(10000); // Check every 10 seconds
+    connect(statusTimer, &QTimer::timeout, [this, process, statusTimer]() {
+        if (process->state() == QProcess::Running) {
+            updateStatus("Traffic sign process still running...");
+        } else {
+            statusTimer->deleteLater();
+        }
+    });
+    statusTimer->start();
 }
 
 void ProcessManager::startDrowsinessDetection()
@@ -375,6 +403,19 @@ void ProcessManager::startLaneDetection()
     }
     
     updateStatus("Lane detection started with " + m_pythonExecutable + " in " + process->workingDirectory());
+    
+    // Set up a timer to check process status periodically
+    QTimer *laneStatusTimer = new QTimer(this);
+    laneStatusTimer->setSingleShot(false);
+    laneStatusTimer->setInterval(10000); // Check every 10 seconds
+    connect(laneStatusTimer, &QTimer::timeout, [this, process, laneStatusTimer]() {
+        if (process->state() == QProcess::Running) {
+            updateStatus("Lane detection process still running...");
+        } else {
+            laneStatusTimer->deleteLater();
+        }
+    });
+    laneStatusTimer->start();
 }
 
 void ProcessManager::terminateAllProcesses()
