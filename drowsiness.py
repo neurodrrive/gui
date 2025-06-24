@@ -136,7 +136,7 @@ def detect_drowsiness(file: UploadFile = File(...)):
     except Exception as e:
         return {"error": str(e)}
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     # --- Automatic video processing for 'vid.mp4' ---
     video_path = 'vid.mp4'
     output_path = 'output.avi'  # Changed to AVI format for Qt compatibility on Linux

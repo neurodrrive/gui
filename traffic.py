@@ -9,7 +9,7 @@ import logging
 import uvicorn
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 app.add_middleware(
@@ -72,7 +72,7 @@ def process_video(input_filename):
     logger.info(f"Detection complete. Saved to {output_path}")
     return True
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     ssl_keyfile = 'key.pem'
     ssl_certfile = 'cert.pem'
     video_filename = 'vid.mp4'  # Change this if you want a different video
