@@ -31,6 +31,8 @@ ApplicationWindow {
         // Verify and set the correct script paths
         processManager.setTrafficSignPath("/home/abdelrhman/Documents/models/traffic_signs_detection_3/main.py")
         processManager.setDrowsinessPath("/home/abdelrhman/Documents/models/drowsiness_detection_f3/main.py")
+        
+        // Set the lane detection path - make sure this points to the correct script
         processManager.setLaneDetectionPath("/home/abdelrhman/Documents/models/lane_detection_3/main.py")
 
         console.log("Script paths set:")
@@ -419,7 +421,11 @@ ApplicationWindow {
                                     frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/traffic_signs_detection_3/output.avi"
                                 } else if (processManager.activeModel === 4) {
                                     console.log("Lane detection process started, waiting for video processing...")
+                                    // Try both possible output paths
                                     frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/lane_detection_3/output.avi"
+                                    frontCameraVideo.videoPathAlt = "/home/abdelrhman/Documents/models/lane_detection_3/output.mp4"
+                                    console.log("Looking for lane detection output at: " + frontCameraVideo.videoPath)
+                                    console.log("Alternative path: " + frontCameraVideo.videoPathAlt)
                                 }
                                 reloadTimer.start()
                             } else {
@@ -444,15 +450,20 @@ ApplicationWindow {
 
                     Timer {
                         id: reloadTimer
-                        interval: 10000 // Wait 10 seconds for video processing to complete
+                        interval: 5000 // Reduced wait time to 5 seconds
                         onTriggered: {
                             console.log("Attempting to load video:", frontCameraVideo.videoPath)
                             console.log("Trying multiple loading methods...")
+                            
+                            // Check if the file exists by trying to load it
+                            var fileExists = Qt.resolvedUrl("file://" + frontCameraVideo.videoPath)
+                            console.log("File URL resolved to:", fileExists)
 
                             // Try different loading approaches
                             frontCameraVideo.source = ""
 
                             // Method 1: Direct path
+                            console.log("Trying direct path:", frontCameraVideo.videoPath)
                             frontCameraVideo.source = frontCameraVideo.videoPath
 
                             // Give it a moment, then try file protocol if needed
@@ -467,9 +478,33 @@ ApplicationWindow {
                             if (!frontCameraVideo.hasVideo) {
                                 console.log("Direct path failed, trying file:// protocol...")
                                 frontCameraVideo.source = ""
-                                frontCameraVideo.source = "file://" + frontCameraVideo.videoPath
+                                
+                                // Try primary path with file:// protocol
+                                var filePath = "file://" + frontCameraVideo.videoPath
+                                console.log("Loading with file:// protocol:", filePath)
+                                frontCameraVideo.source = filePath
+                                
+                                // Schedule an attempt with the alternative path
+                                altPathTimer.start()
+                            } else {
+                                console.log("Direct path succeeded, video loaded")
+                                retryTimer.start()
                             }
-                            // Start retry timer after both attempts
+                        }
+                    }
+                    
+                    Timer {
+                        id: altPathTimer
+                        interval: 1000
+                        onTriggered: {
+                            if (!frontCameraVideo.hasVideo) {
+                                console.log("Primary path with file:// protocol failed, trying alternative path...")
+                                frontCameraVideo.source = ""
+                                var altFilePath = "file://" + frontCameraVideo.videoPathAlt
+                                console.log("Loading alternative path with file:// protocol:", altFilePath)
+                                frontCameraVideo.source = altFilePath
+                            }
+                            // Start retry timer after all attempts
                             retryTimer.start()
                         }
                     }
@@ -490,10 +525,19 @@ ApplicationWindow {
                                 }
 
                                 frontCameraVideo.retryCount++
-                                console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
+                                
+                                // Try alternating between primary and alternative paths
+                                if (frontCameraVideo.retryCount % 2 === 1) {
+                                    console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
+                                    frontCameraVideo.source = ""
+                                    frontCameraVideo.source = frontCameraVideo.videoPath
+                                } else {
+                                    console.log("Retry", frontCameraVideo.retryCount, "loading alternative video:", frontCameraVideo.videoPathAlt)
+                                    frontCameraVideo.source = ""
+                                    frontCameraVideo.source = frontCameraVideo.videoPathAlt
+                                }
+                                
                                 console.log("Video hasVideo:", frontCameraVideo.hasVideo)
-                                frontCameraVideo.source = ""
-                                frontCameraVideo.source = frontCameraVideo.videoPath
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
                                 console.log("Max retries reached for video loading")
                                 retryTimer.stop()

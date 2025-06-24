@@ -84,7 +84,7 @@ private:
     QString m_trafficSignPath = "/home/abdelrhman/Documents/traffic_signs_detection_3/main.py";
     QString m_drowsinessPath = "/home/abdelrhman/Documents/drowsiness_detection_f3/main.py";
     QString m_combinedExtraPath = "/path/to/model3/script3.py";
-    QString m_laneDetectionPath = "/home/abdelrhman/Documents/models/lane_detection_3/lane.py";
+    QString m_laneDetectionPath = "/home/abdelrhman/Documents/models/lane_detection_3/main.py";
 
     // Process management
     QMap<int, QProcess*> m_processes;

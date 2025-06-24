@@ -361,6 +361,11 @@ void ProcessManager::startLaneDetection()
     // Start the process
     QStringList arguments;
     arguments << m_laneDetectionPath;
+    
+    // Print the exact command we're running for debugging
+    QString command = m_pythonExecutable + " " + m_laneDetectionPath;
+    qDebug() << "Running lane detection command:" << command;
+    
     process->start(m_pythonExecutable, arguments);
     
     // Wait a bit to see if it starts successfully
