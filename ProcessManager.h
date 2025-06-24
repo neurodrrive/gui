@@ -22,7 +22,8 @@ public:
         None = 0,
         TrafficSignRecognition = 1,
         Drowsiness = 2,
-        Combined = 3
+        Combined = 3,
+        LaneDetection = 4
     };
     Q_ENUM(ModelType)
 
@@ -40,11 +41,13 @@ public:
     Q_INVOKABLE void setTrafficSignPath(const QString &path);
     Q_INVOKABLE void setDrowsinessPath(const QString &path);
     Q_INVOKABLE void setCombinedPath(const QString &path);
+    Q_INVOKABLE void setLaneDetectionPath(const QString &path);
     
     // Get current paths
     Q_INVOKABLE QString getTrafficSignPath() const { return m_trafficSignPath; }
     Q_INVOKABLE QString getDrowsinessPath() const { return m_drowsinessPath; }
     Q_INVOKABLE QString getCombinedPath() const { return m_combinedExtraPath; }
+    Q_INVOKABLE QString getLaneDetectionPath() const { return m_laneDetectionPath; }
 
 public slots:
     Q_INVOKABLE void startModel(int modelType);
@@ -68,6 +71,7 @@ private:
     void startTrafficSignRecognition();
     void startDrowsinessDetection();
     void startCombinedModel();
+    void startLaneDetection();
     void terminateAllProcesses();
     void updateStatus(const QString &message);
 
@@ -80,6 +84,7 @@ private:
     QString m_trafficSignPath = "/home/abdelrhman/Documents/traffic_signs_detection_3/main.py";
     QString m_drowsinessPath = "/home/abdelrhman/Documents/drowsiness_detection_f3/main.py";
     QString m_combinedExtraPath = "/path/to/model3/script3.py";
+    QString m_laneDetectionPath = "/home/abdelrhman/Documents/models/lane_detection_3/lane.py";
 
     // Process management
     QMap<int, QProcess*> m_processes;

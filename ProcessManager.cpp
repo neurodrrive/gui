@@ -62,6 +62,12 @@ void ProcessManager::setCombinedPath(const QString &path)
     updateStatus("Combined path set to: " + path);
 }
 
+void ProcessManager::setLaneDetectionPath(const QString &path)
+{
+    m_laneDetectionPath = path;
+    updateStatus("Lane detection path set to: " + path);
+}
+
 void ProcessManager::startModel(int modelType)
 {
     // If any model is currently running, stop it first
@@ -80,6 +86,9 @@ void ProcessManager::startModel(int modelType)
             break;
         case Combined:
             startCombinedModel();
+            break;
+        case LaneDetection:
+            startLaneDetection();
             break;
         default:
             updateStatus("Invalid model selected");
@@ -320,6 +329,47 @@ void ProcessManager::startCombinedModel()
     combinedProcess->start(m_pythonExecutable, combinedArgs);
     
     updateStatus("Combined model started with " + m_pythonExecutable);
+}
+
+void ProcessManager::startLaneDetection()
+{
+    QProcess *process = new QProcess(this);
+    
+    // Connect signals
+    connect(process, QOverload<QProcess::ProcessError>::of(&QProcess::errorOccurred),
+            this, &ProcessManager::handleProcessError);
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this, &ProcessManager::handleProcessFinished);
+    connect(process, &QProcess::stateChanged,
+            this, &ProcessManager::handleProcessStateChanged);
+    
+    // Store the process
+    if (m_processes.contains(ModelType::LaneDetection)) {
+        delete m_processes[ModelType::LaneDetection];
+    }
+    m_processes[ModelType::LaneDetection] = process;
+    
+    // Set working directory to the script's directory
+    QFileInfo scriptInfo(m_laneDetectionPath);
+    if (scriptInfo.exists()) {
+        process->setWorkingDirectory(scriptInfo.absolutePath());
+        updateStatus("Working directory set to: " + scriptInfo.absolutePath());
+    } else {
+        updateStatus("Warning: Script file does not exist at " + m_laneDetectionPath);
+    }
+    
+    // Start the process
+    QStringList arguments;
+    arguments << m_laneDetectionPath;
+    process->start(m_pythonExecutable, arguments);
+    
+    // Wait a bit to see if it starts successfully
+    if (!process->waitForStarted(5000)) {
+        updateStatus("Failed to start lane detection process");
+        return;
+    }
+    
+    updateStatus("Lane detection started with " + m_pythonExecutable + " in " + process->workingDirectory());
 }
 
 void ProcessManager::terminateAllProcesses()
