@@ -31,10 +31,12 @@ ApplicationWindow {
         // Verify and set the correct script paths
         processManager.setTrafficSignPath("/home/abdelrhman/Documents/models/traffic_signs_detection_3/main.py")
         processManager.setDrowsinessPath("/home/abdelrhman/Documents/models/drowsiness_detection_f3/main.py")
+        processManager.setLaneDetectionPath("/home/abdelrhman/Documents/models/lane_detection_3/main.py")
 
         console.log("Script paths set:")
         console.log("Traffic Sign:", processManager.getTrafficSignPath())
         console.log("Drowsiness:", processManager.getDrowsinessPath())
+        console.log("Lane Detection:", processManager.getLaneDetectionPath())
     }
 
     // Main window background
@@ -410,9 +412,15 @@ ApplicationWindow {
                     Connections {
                         target: processManager
                         function onIsRunningChanged() {
-                            if (processManager.isRunning && processManager.activeModel === 1) {
+                            if (processManager.isRunning && (processManager.activeModel === 1 || processManager.activeModel === 4)) {
                                 frontCameraVideo.retryCount = 0
-                                console.log("Traffic sign process started, waiting for video processing...")
+                                if (processManager.activeModel === 1) {
+                                    console.log("Traffic sign process started, waiting for video processing...")
+                                    frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/traffic_signs_detection_3/output.avi"
+                                } else if (processManager.activeModel === 4) {
+                                    console.log("Lane detection process started, waiting for video processing...")
+                                    frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/lane_detection_3/output.avi"
+                                }
                                 reloadTimer.start()
                             } else {
                                 frontCameraVideo.source = ""
@@ -425,7 +433,8 @@ ApplicationWindow {
                             console.log("Process status:", processManager.statusMessage)
                             // If the process indicates completion, try loading video sooner
                             if (processManager.statusMessage.includes("complete") ||
-                                processManager.statusMessage.includes("finished")) {
+                                processManager.statusMessage.includes("finished") ||
+                                processManager.statusMessage.includes("Output saved")) {
                                 console.log("Process seems complete, trying to load video now...")
                                 reloadTimer.stop()
                                 reloadTimer.start()
@@ -472,7 +481,7 @@ ApplicationWindow {
                         onTriggered: {
                             if (frontCameraVideo.retryCount < frontCameraVideo.maxRetries &&
                                 processManager.isRunning &&
-                                processManager.activeModel === 1) {
+                                (processManager.activeModel === 1 || processManager.activeModel === 4)) {
 
                                 if (frontCameraVideo.hasVideo) {
                                     console.log("Video loaded successfully")
@@ -500,8 +509,8 @@ ApplicationWindow {
                     Text {
                         anchors.centerIn: parent
                         text: {
-                            if (!processManager.isRunning || processManager.activeModel !== 1) {
-                                return "Start Traffic Sign Recognition to view output"
+                            if (!processManager.isRunning || (processManager.activeModel !== 1 && processManager.activeModel !== 4)) {
+                                return "Start Traffic Sign Recognition or Lane Detection to view output"
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
                                 return "Failed to load video after " + frontCameraVideo.maxRetries + " attempts"
                             } else if (!frontCameraVideo.hasVideo) {
@@ -512,7 +521,7 @@ ApplicationWindow {
                         }
                         color: "#FFFFFF"
                         font.pixelSize: 18
-                        visible: !frontCameraVideo.hasVideo || (!processManager.isRunning || processManager.activeModel !== 1)
+                        visible: !frontCameraVideo.hasVideo || (!processManager.isRunning || (processManager.activeModel !== 1 && processManager.activeModel !== 4))
                     }
 
                     // Play controls overlay
@@ -581,8 +590,11 @@ ApplicationWindow {
 
                     Components.FeatureButton {
                         buttonText: "Lane\nDetection"
-                        bgColor: accentColor
+                        bgColor: processManager.activeModel === 4 ? Qt.darker(accentColor, 1.3) : accentColor
                         Layout.fillWidth: true
+                        onClicked: {
+                            processManager.startModel(4) // Lane Detection
+                        }
                     }
 
                     Components.FeatureButton {
