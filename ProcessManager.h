@@ -42,7 +42,7 @@ public:
     Q_INVOKABLE void setDrowsinessPath(const QString &path);
     Q_INVOKABLE void setCombinedPath(const QString &path);
     Q_INVOKABLE void setLaneDetectionPath(const QString &path);
-    
+
     // Get current paths
     Q_INVOKABLE QString getTrafficSignPath() const { return m_trafficSignPath; }
     Q_INVOKABLE QString getDrowsinessPath() const { return m_drowsinessPath; }
@@ -81,13 +81,13 @@ private:
     QString m_pythonExecutable = "python3";  // Default to python3 for Linux
 
     // Script paths - Linux paths as specified
-    QString m_trafficSignPath = "/home/abdelrhman/Documents/traffic_signs_detection_3/main.py";
-    QString m_drowsinessPath = "/home/abdelrhman/Documents/drowsiness_detection_f3/main.py";
+    QString m_trafficSignPath = "/models/traffic_signs_detection_3/main.py";
+    QString m_drowsinessPath = "/models/drowsiness_detection_f3/main.py";
     QString m_combinedExtraPath = "/path/to/model3/script3.py";
-    QString m_laneDetectionPath = "/home/abdelrhman/Documents/models/lane_detection_3/main.py";
+    QString m_laneDetectionPath = "/models/lane_detection_3/main.py";
 
     // Process management
     QMap<int, QProcess*> m_processes;
 };
 
-#endif // PROCESSMANAGER_H 
+#endif // PROCESSMANAGER_H

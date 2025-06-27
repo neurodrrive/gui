@@ -29,11 +29,11 @@ ApplicationWindow {
 
     Component.onCompleted: {
         // Verify and set the correct script paths
-        processManager.setTrafficSignPath("/home/abdelrhman/Documents/models/traffic_signs_detection_3/main.py")
-        processManager.setDrowsinessPath("/home/abdelrhman/Documents/models/drowsiness_detection_f3/main.py")
-        
+        processManager.setTrafficSignPath("/models/traffic_signs_detection_3/main.py")
+        processManager.setDrowsinessPath("/models/drowsiness_detection_f3/main.py")
+
         // Set the lane detection path - make sure this points to the correct script
-        processManager.setLaneDetectionPath("/home/abdelrhman/Documents/models/lane_detection_3/main.py")
+        processManager.setLaneDetectionPath("/models/lane_detection_3/main.py")
 
         console.log("Script paths set:")
         console.log("Traffic Sign:", processManager.getTrafficSignPath())
@@ -407,8 +407,38 @@ ApplicationWindow {
 
                     property int retryCount: 0
                     property int maxRetries: 10
-                    property string videoPath: "/home/abdelrhman/Documents/models/traffic_signs_detection_3/output.avi"
-                    property string videoPathAlt: "/home/abdelrhman/Documents/models/drowsiness_detection_f3/output.mp4"
+                    property string videoPath: "/models/traffic_signs_detection_3/output.avi"
+                    property string videoPathAlt: "/models/drowsiness_detection_f3/output.mp4"
+
+                    // Add error handling for Raspberry Pi multimedia issues
+                    onErrorChanged: {
+                        if (error !== MediaPlayer.NoError) {
+                            console.log("Video error:", error, "- Error string:", errorString)
+                            console.log("Trying alternative loading method...")
+                            // Try loading with a slight delay
+                            delayedLoadTimer.start()
+                        }
+                    }
+
+                    onStatusChanged: {
+                        console.log("Video status changed to:", status)
+                        if (status === MediaPlayer.Loaded) {
+                            console.log("Video loaded successfully!")
+                        } else if (status === MediaPlayer.InvalidMedia) {
+                            console.log("Invalid media detected, retrying...")
+                            delayedLoadTimer.start()
+                        }
+                    }
+
+                    Timer {
+                        id: delayedLoadTimer
+                        interval: 2000
+                        onTriggered: {
+                            console.log("Delayed reload attempt...")
+                            frontCameraVideo.source = ""
+                            frontCameraVideo.source = frontCameraVideo.videoPath
+                        }
+                    }
 
                     // Reload video when process starts
                     Connections {
@@ -418,10 +448,10 @@ ApplicationWindow {
                                 frontCameraVideo.retryCount = 0
                                 if (processManager.activeModel === 1) {
                                     console.log("Traffic sign process started, waiting for video processing...")
-                                    frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/traffic_signs_detection_3/output.avi"
+                                    frontCameraVideo.videoPath = "/models/traffic_signs_detection_3/output.avi"
                                 } else if (processManager.activeModel === 4) {
                                     console.log("Lane detection process started, waiting for video processing...")
-                                    frontCameraVideo.videoPath = "/home/abdelrhman/Documents/models/lane_detection_3/output.avi"
+                                    frontCameraVideo.videoPath = "/models/lane_detection_3/output.avi"
                                     console.log("Looking for lane detection output at: " + frontCameraVideo.videoPath)
                                 }
                                 reloadTimer.start()
@@ -430,6 +460,7 @@ ApplicationWindow {
                                 frontCameraVideo.source = ""
                                 reloadTimer.stop()
                                 retryTimer.stop()
+                                delayedLoadTimer.stop()
                             }
                             // If process finished but model is still active, keep playing the video
                         }
@@ -453,13 +484,12 @@ ApplicationWindow {
                         interval: 10000 // Increased wait time to 10 seconds for Raspberry Pi
                         onTriggered: {
                             console.log("Attempting to load video:", frontCameraVideo.videoPath)
-                            console.log("Trying multiple loading methods...")
                             
-                            // Try direct path first
+                            // Simple approach - just try to load the video directly
+                            // The file should exist since the process finished successfully
+                            console.log("Video file processing completed, attempting to load...")
                             frontCameraVideo.source = ""
                             frontCameraVideo.source = frontCameraVideo.videoPath
-                            
-                            // Give it a moment, then try file protocol if needed
                             fileProtocolTimer.start()
                         }
                     }
@@ -504,10 +534,8 @@ ApplicationWindow {
                                 frontCameraVideo.source = ""
                                 if (frontCameraVideo.retryCount % 2 === 0) {
                                     frontCameraVideo.source = "file://" + frontCameraVideo.videoPath
-                                    console.log("Trying file:// protocol")
                                 } else {
                                     frontCameraVideo.source = frontCameraVideo.videoPath
-                                    console.log("Trying direct path")
                                 }
                                 console.log("Video hasVideo:", frontCameraVideo.hasVideo)
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
@@ -756,7 +784,7 @@ ApplicationWindow {
 
                     property int retryCount: 0
                     property int maxRetries: 10
-                    property string videoPath: "/home/abdelrhman/Documents/models/drowsiness_detection_f3/output.avi"
+                    property string videoPath: "/models/drowsiness_detection_f3/output.avi"
 
                     // Reload video when process starts
                     Connections {
@@ -773,11 +801,11 @@ ApplicationWindow {
                                 cabinFileProtocolTimer.stop()
                             }
                         }
-                        
+
                         function onStatusMessageChanged() {
                             console.log("Process status:", processManager.statusMessage)
                             // If the process indicates completion, try loading video sooner
-                            if (processManager.statusMessage.includes("complete") || 
+                            if (processManager.statusMessage.includes("complete") ||
                                 processManager.statusMessage.includes("finished") ||
                                 processManager.statusMessage.includes("Done")) {
                                 console.log("Process seems complete, trying to load video now...")
@@ -793,18 +821,18 @@ ApplicationWindow {
                         onTriggered: {
                             console.log("Attempting to load cabin video:", cabinCameraVideo.videoPath)
                             console.log("Trying multiple loading methods...")
-                            
+
                             // Reset source
                             cabinCameraVideo.source = ""
-                            
+
                             // Method 1: Direct path
                             cabinCameraVideo.source = cabinCameraVideo.videoPath
-                            
+
                             // Give it a moment, then try file protocol if needed
                             cabinFileProtocolTimer.start()
                         }
                     }
-                    
+
                     Timer {
                         id: cabinFileProtocolTimer
                         interval: 1000
