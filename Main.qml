@@ -453,29 +453,14 @@ ApplicationWindow {
                         interval: 10000 // Increased wait time to 10 seconds for Raspberry Pi
                         onTriggered: {
                             console.log("Attempting to load video:", frontCameraVideo.videoPath)
+                            console.log("Trying multiple loading methods...")
                             
-                            // Check if file exists before trying to load
-                            var fileInfo = Qt.createQmlObject('import Qt.labs.platform 1.1; FileInfo { }', frontCameraVideo)
-                            if (fileInfo) {
-                                fileInfo.file = frontCameraVideo.videoPath
-                                if (fileInfo.exists) {
-                                    console.log("Video file exists, attempting to load...")
-                                    frontCameraVideo.source = ""
-                                    frontCameraVideo.source = frontCameraVideo.videoPath
-                                    fileProtocolTimer.start()
-                                } else {
-                                    console.log("Video file does not exist yet, will retry...")
-                                    // Start retry timer to check again
-                                    retryTimer.start()
-                                }
-                                fileInfo.destroy()
-                            } else {
-                                // Fallback to old method if FileInfo not available
-                                console.log("Trying to load video (FileInfo not available)...")
-                                frontCameraVideo.source = ""
-                                frontCameraVideo.source = frontCameraVideo.videoPath
-                                fileProtocolTimer.start()
-                            }
+                            // Try direct path first
+                            frontCameraVideo.source = ""
+                            frontCameraVideo.source = frontCameraVideo.videoPath
+                            
+                            // Give it a moment, then try file protocol if needed
+                            fileProtocolTimer.start()
                         }
                     }
 
@@ -515,30 +500,14 @@ ApplicationWindow {
                                 frontCameraVideo.retryCount++
                                 console.log("Retry", frontCameraVideo.retryCount, "loading video:", frontCameraVideo.videoPath)
                                 
-                                // Check if file exists before trying to load (for Raspberry Pi performance)
-                                var fileInfo = Qt.createQmlObject('import Qt.labs.platform 1.1; FileInfo { }', frontCameraVideo)
-                                if (fileInfo) {
-                                    fileInfo.file = frontCameraVideo.videoPath
-                                    if (fileInfo.exists) {
-                                        console.log("File exists, attempting to load...")
-                                        frontCameraVideo.source = ""
-                                        if (frontCameraVideo.retryCount % 2 === 0) {
-                                            frontCameraVideo.source = "file://" + frontCameraVideo.videoPath
-                                        } else {
-                                            frontCameraVideo.source = frontCameraVideo.videoPath
-                                        }
-                                    } else {
-                                        console.log("File still doesn't exist, will continue waiting...")
-                                    }
-                                    fileInfo.destroy()
+                                // Try alternating between direct path and file protocol
+                                frontCameraVideo.source = ""
+                                if (frontCameraVideo.retryCount % 2 === 0) {
+                                    frontCameraVideo.source = "file://" + frontCameraVideo.videoPath
+                                    console.log("Trying file:// protocol")
                                 } else {
-                                    // Fallback method
-                                    frontCameraVideo.source = ""
-                                    if (frontCameraVideo.retryCount % 2 === 0) {
-                                        frontCameraVideo.source = "file://" + frontCameraVideo.videoPath
-                                    } else {
-                                        frontCameraVideo.source = frontCameraVideo.videoPath
-                                    }
+                                    frontCameraVideo.source = frontCameraVideo.videoPath
+                                    console.log("Trying direct path")
                                 }
                                 console.log("Video hasVideo:", frontCameraVideo.hasVideo)
                             } else if (frontCameraVideo.retryCount >= frontCameraVideo.maxRetries) {
