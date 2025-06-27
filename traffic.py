@@ -46,40 +46,94 @@ def process_video(input_filename):
     if not os.path.exists(input_path):
         logger.error(f"{input_filename} not found in project root.")
         return False
+    
     cap = cv2.VideoCapture(input_path)
-    # Use XVID codec for better compatibility with Qt
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    if not cap.isOpened():
+        logger.error("Could not open input video")
+        return False
+    
+    # Get video properties
     fps = cap.get(cv2.CAP_PROP_FPS) or 25
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
+    # Reduce resolution for Raspberry Pi performance
+    # Scale down if resolution is too high
+    if width > 640:
+        scale_factor = 640 / width
+        width = 640
+        height = int(height * scale_factor)
+        logger.info(f"Scaling down video to {width}x{height} for better performance")
+    
+    # Reduce FPS for Raspberry Pi performance
+    target_fps = min(fps, 15)  # Limit to 15 FPS max
+    logger.info(f"Processing at {target_fps} FPS (original: {fps})")
+    
+    # Use XVID codec for better compatibility with Qt
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    out = cv2.VideoWriter(output_path, fourcc, target_fps, (width, height))
     
     if not out.isOpened():
         logger.warning("Could not open video writer with XVID, trying MJPG...")
         fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-        out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+        out = cv2.VideoWriter(output_path, fourcc, target_fps, (width, height))
         
     if not out.isOpened():
         logger.error("Could not open video writer")
         return False
+    
+    frame_count = 0
+    processed_frames = 0
+    
+    logger.info(f"Starting video processing: {total_frames} frames")
+    
     while True:
         ret, frame = cap.read()
         if not ret:
             break
-        results = model(frame, conf=0.85, iou=0.85)
-        for result in results:
-            for box in result.boxes:
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                cls = int(box.cls[0])
-                conf = float(box.conf[0])
-                class_name = result.names[cls]
+        
+        frame_count += 1
+        
+        # Skip frames for performance on Raspberry Pi
+        if fps > target_fps and frame_count % int(fps / target_fps) != 0:
+            continue
+            
+        # Resize frame if needed
+        if frame.shape[1] != width or frame.shape[0] != height:
+            frame = cv2.resize(frame, (width, height))
+        
+        # Process every Nth frame for detection to improve performance
+        if processed_frames % 3 == 0:  # Process every 3rd frame
+            results = model(frame, conf=0.85, iou=0.85)
+            detections = []
+            
+            for result in results:
+                for box in result.boxes:
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
+                    cls = int(box.cls[0])
+                    conf = float(box.conf[0])
+                    class_name = result.names[cls]
+                    detections.append((x1, y1, x2, y2, class_name, conf))
+        
+        # Draw detections from last processing
+        if 'detections' in locals():
+            for x1, y1, x2, y2, class_name, conf in detections:
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
                 label = f"{class_name}: {conf:.2f}"
                 cv2.putText(frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+        
         out.write(frame)
+        processed_frames += 1
+        
+        # Progress reporting
+        if processed_frames % 30 == 0:  # Every 30 frames
+            progress = (frame_count / total_frames) * 100
+            logger.info(f"Progress: {progress:.1f}% ({processed_frames} frames processed)")
+    
     cap.release()
     out.release()
-    logger.info(f"Detection complete. Saved to {output_path}")
+    logger.info(f"Detection complete. Processed {processed_frames} frames. Saved to {output_path}")
     return True
 
 if __name__ == '__main__':

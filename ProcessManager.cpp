@@ -3,6 +3,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QTimer>
+#include <QFile>
 
 ProcessManager::ProcessManager(QObject *parent) 
     : QObject(parent)
@@ -231,31 +232,39 @@ void ProcessManager::startTrafficSignRecognition()
         updateStatus("Warning: Script file does not exist at " + m_trafficSignPath);
     }
     
+    // Remove the old output video file if it exists
+    QString outputPath = scriptInfo.absolutePath() + "/output.avi";
+    QFile::remove(outputPath);
+    updateStatus("Starting video processing... This may take several minutes on Raspberry Pi");
+    
     // Start the process
     QStringList arguments;
     arguments << m_trafficSignPath;
     process->start(m_pythonExecutable, arguments);
     
-    // Wait a bit to see if it starts successfully
-    if (!process->waitForStarted(5000)) {
+    // Use a shorter timeout for initial start
+    if (!process->waitForStarted(3000)) {
         updateStatus("Failed to start traffic sign recognition process");
         return;
     }
     
     updateStatus("Traffic sign recognition started with " + m_pythonExecutable + " in " + process->workingDirectory());
     
-    // Set up a timer to check process status periodically
-    QTimer *statusTimer = new QTimer(this);
-    statusTimer->setSingleShot(false);
-    statusTimer->setInterval(10000); // Check every 10 seconds
-    connect(statusTimer, &QTimer::timeout, [this, process, statusTimer]() {
+    // Set up a timer to provide progress updates
+    QTimer *progressTimer = new QTimer(this);
+    progressTimer->setSingleShot(false);
+    progressTimer->setInterval(5000); // Check every 5 seconds
+    int progressCounter = 0;
+    connect(progressTimer, &QTimer::timeout, [this, process, progressTimer, progressCounter]() mutable {
         if (process->state() == QProcess::Running) {
-            updateStatus("Traffic sign process still running...");
+            progressCounter++;
+            QString dots = QString(".").repeated((progressCounter % 4) + 1);
+            updateStatus(QString("Processing video%1 (%2s elapsed)").arg(dots).arg(progressCounter * 5));
         } else {
-            statusTimer->deleteLater();
+            progressTimer->deleteLater();
         }
     });
-    statusTimer->start();
+    progressTimer->start();
 }
 
 void ProcessManager::startDrowsinessDetection()
