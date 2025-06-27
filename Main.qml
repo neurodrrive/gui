@@ -410,26 +410,6 @@ ApplicationWindow {
                     property string videoPath: "/models/traffic_signs_detection_3/output.avi"
                     property string videoPathAlt: "/models/drowsiness_detection_f3/output.mp4"
 
-                    // Add error handling for Raspberry Pi multimedia issues
-                    onErrorChanged: {
-                        if (error !== MediaPlayer.NoError) {
-                            console.log("Video error:", error, "- Error string:", errorString)
-                            console.log("Trying alternative loading method...")
-                            // Try loading with a slight delay
-                            delayedLoadTimer.start()
-                        }
-                    }
-
-                    onStatusChanged: {
-                        console.log("Video status changed to:", status)
-                        if (status === MediaPlayer.Loaded) {
-                            console.log("Video loaded successfully!")
-                        } else if (status === MediaPlayer.InvalidMedia) {
-                            console.log("Invalid media detected, retrying...")
-                            delayedLoadTimer.start()
-                        }
-                    }
-
                     Timer {
                         id: delayedLoadTimer
                         interval: 2000
