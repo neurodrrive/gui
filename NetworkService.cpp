@@ -33,10 +33,10 @@ bool NetworkService::verifyDriver(const QString &carId, const QString &imagePath
     }
     
     // Prepare the request
-    QNetworkRequest request(QUrl("https://localhost:5041/api/verify-driver"));
+   // QNetworkRequest request(QUrl("https://localhost:5041/api/verify-driver"));
 
     //the actual url for live web
-    //QNetworkRequest request(QUrl("https://neurodrive.runasp.net/api/verify-driver"));
+    QNetworkRequest request(QUrl("https://neurodrive.runasp.net/api/verify-driver"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     
     // Apply SSL configuration that ignores certificate validation
